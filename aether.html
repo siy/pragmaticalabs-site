@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aether | Distributed Java Runtime | Pragmatica Labs</title>
-  <meta name="description" content="Aether - distributed Java runtime. The third option between monolith and microservices. Simpler than Kubernetes, focused on business logic.">
+  <meta name="description" content="Aether - distributed Java runtime with predictive autoscaling. The third option between monolith and microservices. Production-validated with 80 E2E tests.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -28,7 +28,7 @@
   <section class="product-hero">
     <div class="container">
       <h1>Aether</h1>
-      <p>Distributed Java runtime — the third option between monolith and microservices. Focus on business logic, not infrastructure complexity.</p>
+      <p>Distributed Java runtime with predictive autoscaling. The third option between monolith and microservices. Write business logic, deploy distributed.</p>
     </div>
   </section>
 
@@ -43,9 +43,9 @@
         </div>
         <div>
           <h2>The Solution</h2>
-          <p>Aether is a distributed Java runtime that handles the hard parts for you. Write your business logic, deploy it, and let Aether manage the distribution.</p>
+          <p>Aether is a distributed Java runtime that handles the hard parts for you. Write your business logic as "slices", deploy them, and let Aether manage distribution, scaling, and resilience.</p>
           <p>No Kubernetes. No service mesh. No YAML sprawl. Just Java code that runs distributed when you need it to.</p>
-          <p>Built-in observability means you understand what's happening without adding more tools.</p>
+          <p>Built-in observability, predictive autoscaling, and zero-downtime deployments — out of the box.</p>
         </div>
       </div>
     </div>
@@ -58,33 +58,36 @@
       </div>
       <div class="cards">
         <div class="card">
-          <div class="card-icon">S</div>
-          <h3>Simplicity First</h3>
-          <p>Deploy and scale without Kubernetes complexity. Aether handles distribution, you focus on business logic.</p>
+          <div class="card-icon">P</div>
+          <h3>Predictive Autoscaling</h3>
+          <p>ML-based scaling that learns from traffic patterns. Scale before the load hits, not after.</p>
           <ul class="features-list">
-            <li>No container orchestration required</li>
-            <li>Minimal configuration</li>
-            <li>Straightforward deployment</li>
+            <li>2-hour sliding window analysis</li>
+            <li>Pattern recognition for traffic spikes</li>
+            <li>Preemptive scaling decisions</li>
+            <li>Decision tree fallback for reliability</li>
           </ul>
         </div>
         <div class="card">
           <div class="card-icon">O</div>
-          <h3>Built-in Observability</h3>
+          <h3>Full Observability</h3>
           <p>Understand your distributed system without bolting on additional tools.</p>
           <ul class="features-list">
-            <li>Integrated tracing</li>
-            <li>Metrics out of the box</li>
-            <li>Clear operational visibility</li>
+            <li>Per-method invocation metrics</li>
+            <li>Prometheus endpoint built-in</li>
+            <li>Configurable alerts and thresholds</li>
+            <li>Real-time dashboard</li>
           </ul>
         </div>
         <div class="card">
           <div class="card-icon">R</div>
-          <h3>Runtime Intelligence</h3>
-          <p>Aether makes smart decisions about where and how code runs.</p>
+          <h3>Rolling Updates</h3>
+          <p>Deploy new versions with zero downtime and full control.</p>
           <ul class="features-list">
-            <li>Automatic load distribution</li>
-            <li>Fault tolerance</li>
-            <li>Resource-aware scheduling</li>
+            <li>Two-stage deploy/route model</li>
+            <li>Weighted traffic shifting</li>
+            <li>Health-based promotion</li>
+            <li>One-click rollback</li>
           </ul>
         </div>
       </div>
@@ -95,13 +98,43 @@
     <div class="container">
       <div class="two-col">
         <div>
-          <h2>Aether Forge</h2>
-          <p>Test your distributed systems before production. Aether Forge is our system simulator for load testing and chaos engineering.</p>
+          <h2>Production Validated</h2>
+          <p>Aether is tested with a comprehensive E2E suite covering real production scenarios.</p>
           <ul class="features-list">
-            <li>Simulate production load</li>
-            <li>Inject failures</li>
-            <li>Validate behavior under stress</li>
-            <li>Catch issues before deployment</li>
+            <li><strong>80 end-to-end tests</strong> across 12 test classes</li>
+            <li>Cluster formation and leader election</li>
+            <li>Node failures and recovery</li>
+            <li>Network partitions and split-brain</li>
+            <li>Rolling updates and traffic shifting</li>
+            <li>Chaos engineering scenarios</li>
+          </ul>
+        </div>
+        <div>
+          <h2>Simple Setup</h2>
+          <p>Get a cluster running in minutes with aether-up.</p>
+          <ul class="features-list">
+            <li><strong>aether-up</strong> — generates Docker Compose or Kubernetes manifests</li>
+            <li><strong>aether-cli</strong> — REPL and batch operations</li>
+            <li><strong>30+ Management API endpoints</strong> — full programmatic control</li>
+            <li><strong>Aether Forge</strong> — local development with visual dashboard</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt">
+    <div class="container">
+      <div class="two-col">
+        <div>
+          <h2>Aether Forge</h2>
+          <p>Local development environment with visual dashboard for testing distributed behavior.</p>
+          <ul class="features-list">
+            <li>5-node simulated cluster</li>
+            <li>Real-time metrics visualization</li>
+            <li>Load generation with configurable rates</li>
+            <li>Chaos injection (kill nodes, inject latency)</li>
+            <li>Test resilience before production</li>
           </ul>
         </div>
         <div>
@@ -110,14 +143,15 @@
             <li><strong>Growing monoliths</strong> — Scale without rewriting</li>
             <li><strong>Microservices fatigue</strong> — Simplify operations</li>
             <li><strong>New distributed systems</strong> — Start right</li>
-            <li><strong>Edge computing</strong> — Deploy anywhere</li>
+            <li><strong>Variable load patterns</strong> — Predictive scaling handles spikes</li>
+            <li><strong>Zero-downtime requirements</strong> — Rolling updates built-in</li>
           </ul>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="alt">
+  <section>
     <div class="container">
       <div class="section-header">
         <h2>Licensing</h2>
@@ -142,7 +176,7 @@
     </div>
   </section>
 
-  <section>
+  <section class="alt">
     <div class="container">
       <div class="section-header">
         <h2>Pilot Program</h2>
@@ -174,7 +208,7 @@
     </div>
   </section>
 
-  <section class="alt">
+  <section>
     <div class="container">
       <div class="section-header">
         <h2>Resources</h2>
@@ -182,12 +216,12 @@
       <div class="cards">
         <div class="card">
           <h3>GitHub</h3>
-          <p>Aether source code and documentation.</p>
+          <p>Source code, documentation, and examples.</p>
           <a href="https://github.com/siy/aether" target="_blank" class="btn btn-outline mt-2">View on GitHub</a>
         </div>
         <div class="card">
           <h3>Current Version</h3>
-          <p>Aether 0.6.3 — Public release, ready for pilots.</p>
+          <p>Aether 0.7.1 — Production-validated, 80 E2E tests, predictive autoscaling.</p>
         </div>
         <div class="card">
           <h3>Questions?</h3>
