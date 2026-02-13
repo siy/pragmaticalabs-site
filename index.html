@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pragmatica Labs | Pragmatic Solutions for Java Teams</title>
-  <meta name="description" content="High-quality Java methodology, training, and distributed runtime solutions. JBCT and Aether by Pragmatica Labs.">
+  <meta name="description" content="Pragmatica Aether — distributed Java runtime with predictive autoscaling. JBCT — methodology and tooling for deterministic Java code. By Pragmatica Labs.">
   <meta property="og:title" content="Pragmatica Labs | Pragmatic Solutions for Java Teams">
-  <meta property="og:description" content="High-quality code. Simple systems. Built on 35 years of production experience.">
+  <meta property="og:description" content="Distributed Java runtime and coding methodology. Built on 35 years of production experience.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://pragmaticalabs.io/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,8 +34,8 @@
       <h1>Pragmatic Solutions for Java Teams</h1>
       <p class="tagline">High-quality code. Simple systems. Built on 35 years of production experience.</p>
       <div class="cta-buttons">
-        <a href="jbct.html" class="btn btn-primary">Explore JBCT</a>
-        <a href="aether.html" class="btn btn-secondary">Discover Aether</a>
+        <a href="aether.html" class="btn btn-primary">Discover Aether</a>
+        <a href="jbct.html" class="btn btn-secondary">Explore JBCT</a>
       </div>
     </div>
   </section>
@@ -43,33 +43,43 @@
   <section>
     <div class="container">
       <div class="section-header">
-        <h2>What We Offer</h2>
-        <p>Two solutions for modern Java teams facing real-world challenges.</p>
+        <h2>Let Java Be Java</h2>
+        <p>Java was designed for managed environments. The fat-jar era threw that away. Aether brings it back.</p>
       </div>
-      <div class="cards">
-        <div class="card">
-          <div class="card-icon">J</div>
-          <h3>JBCT</h3>
-          <p>Java Backend Coding Technology — methodology and tooling for writing high-quality, deterministic Java code.</p>
-          <ul class="features-list">
-            <li>Automated code validation with zero false negatives</li>
-            <li>Guardrails for AI-generated code</li>
-            <li>CLI and Maven plugin for CI/CD integration</li>
-            <li>Training and consulting services</li>
-          </ul>
-          <a href="jbct.html" class="btn btn-outline mt-2">Learn More</a>
+      <div class="two-col">
+        <div>
+          <div class="code-block">
+            <pre><code>@Slice
+public interface OrderService {
+    Promise&lt;OrderResult&gt; placeOrder(PlaceOrderRequest request);
+
+    static OrderService orderService(InventoryService inventory,
+                                     PricingEngine pricing) {
+        return request -&gt; inventory.check(request.items())
+                .flatMap(available -&gt; pricing.calculate(available))
+                .map(priced -&gt; OrderResult.placed(priced));
+    }
+}</code></pre>
+          </div>
         </div>
-        <div class="card">
-          <div class="card-icon">A</div>
-          <h3>Pragmatica Aether</h3>
-          <p>Distributed Java runtime that returns Java to its natural habitat. Write business logic as slices, deploy distributed. The runtime handles everything else.</p>
-          <ul class="features-list">
-            <li>ML-based predictive autoscaling</li>
-            <li>Zero-downtime rolling updates</li>
-            <li>Fault tolerance — survives loss of half the nodes</li>
-            <li>Pilot program available</li>
-          </ul>
-          <a href="aether.html" class="btn btn-outline mt-2">Learn More</a>
+        <div>
+          <p>Write an interface annotated with <code>@Slice</code>. Aether handles distribution, scaling, resilience, observability, and zero-downtime deployments.</p>
+          <p>No HTTP clients. No service discovery. No retry logic. No circuit breakers. No serialization code. A method call is the only visible contract.</p>
+          <div class="stats mt-2">
+            <div>
+              <div class="stat-value">6.5K</div>
+              <div class="stat-label">Requests/sec</div>
+            </div>
+            <div>
+              <div class="stat-value">&lt;1ms</div>
+              <div class="stat-label">Latency</div>
+            </div>
+            <div>
+              <div class="stat-value">81</div>
+              <div class="stat-label">E2E tests</div>
+            </div>
+          </div>
+          <a href="aether.html" class="btn btn-outline mt-2">Learn more about Aether</a>
         </div>
       </div>
     </div>
@@ -87,18 +97,52 @@
           <p>Every microservice bundles web servers, serialization, service discovery, config management, metrics, and retry logic. Infrastructure and business logic compile together, deploy together, break together.</p>
         </div>
         <div class="card">
-          <h4>AI Code Quality Gap</h4>
-          <p>84% of developers use AI coding tools, but 46% don't trust the output. Code churn from AI is 41% higher. Teams need guardrails.</p>
+          <h4>Scaling Complexity</h4>
+          <p>Kubernetes solves distribution but adds operational burden. Teams spend more time managing infrastructure than building features. A platform team becomes mandatory.</p>
         </div>
         <div class="card">
-          <h4>Inconsistent Codebases</h4>
-          <p>Growing teams mean growing inconsistency. Code reviews catch style issues, not architectural problems. New developers take months to become productive.</p>
+          <h4>AI Code Quality Gap</h4>
+          <p>84% of developers use AI coding tools, but 46% don't trust the output. Code churn from AI is 41% higher. Teams need guardrails.</p>
         </div>
       </div>
     </div>
   </section>
 
   <section>
+    <div class="container">
+      <div class="section-header">
+        <h2>Two Solutions, One Stack</h2>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <div class="card-icon">A</div>
+          <h3>Pragmatica Aether</h3>
+          <p>Distributed Java runtime that returns Java to its natural habitat. Write business logic as slices, deploy distributed. The runtime handles everything else.</p>
+          <ul class="features-list">
+            <li>ML-based predictive autoscaling</li>
+            <li>Zero-downtime rolling updates</li>
+            <li>Fault tolerance — survives loss of half the nodes</li>
+            <li>Legacy migration in one sprint</li>
+          </ul>
+          <a href="aether.html" class="btn btn-outline mt-2">Learn More</a>
+        </div>
+        <div class="card">
+          <div class="card-icon">J</div>
+          <h3>JBCT</h3>
+          <p>Methodology and tooling for writing deterministic, exception-free Java code. The patterns that make Aether slices clean — applied to any Java project.</p>
+          <ul class="features-list">
+            <li>Automated code validation with zero false negatives</li>
+            <li>Guardrails for AI-generated code</li>
+            <li>CLI and Maven plugin for CI/CD integration</li>
+            <li>Training and consulting services</li>
+          </ul>
+          <a href="jbct.html" class="btn btn-outline mt-2">Learn More</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt">
     <div class="container">
       <div class="section-header">
         <h2>Our Approach</h2>
@@ -112,14 +156,14 @@
         </div>
         <div>
           <h3>Modular Adoption</h3>
-          <p>You don't have to go all-in. JBCT's elements improve code quality even without full adoption. Aether can run alongside existing infrastructure.</p>
+          <p>You don't have to go all-in. Start with Aether Ember in a single JVM alongside your existing application — or adopt JBCT patterns one at a time.</p>
           <p>Start small, prove value, expand when ready.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="alt">
+  <section>
     <div class="container text-center">
       <h2>Ready to Talk?</h2>
       <p>Whether you're exploring options or ready to start a pilot, we'd love to hear from you.</p>
@@ -139,8 +183,8 @@
         <div>
           <h4>Products</h4>
           <ul class="footer-links">
-            <li><a href="jbct.html">JBCT</a></li>
             <li><a href="aether.html">Aether</a></li>
+            <li><a href="jbct.html">JBCT</a></li>
             <li><a href="https://pragmatica.dev" target="_blank">Documentation</a></li>
           </ul>
         </div>
