@@ -316,6 +316,19 @@ section.alt {
   }
 }
 
+/* Video Embed */
+.video-embed {
+  max-width: 640px;
+  margin: 1.5rem auto 0;
+}
+
+.video-embed iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: none;
+  border-radius: 8px;
+}
+
 /* Code Block */
 .code-block {
   background: var(--navy-dark);
