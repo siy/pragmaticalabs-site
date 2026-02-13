@@ -49,6 +49,14 @@ p {
   color: var(--gray-600);
 }
 
+code {
+  background: var(--gray-200);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.875em;
+}
+
 a {
   color: var(--amber-dark);
   text-decoration: none;
@@ -286,12 +294,20 @@ section.alt {
   max-width: 700px;
 }
 
+.product-hero .hero-subtitle {
+  font-size: 1.75rem;
+  color: var(--amber);
+  font-weight: 600;
+  margin-bottom: 1rem;
+  max-width: none;
+}
+
 /* Two Column Layout */
 .two-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 3rem;
-  align-items: center;
+  align-items: start;
 }
 
 @media (max-width: 768px) {
@@ -308,11 +324,49 @@ section.alt {
   overflow-x: auto;
 }
 
+.code-block pre {
+  margin: 0;
+  white-space: pre;
+  overflow-x: auto;
+}
+
 .code-block code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
   color: var(--gray-100);
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
   font-size: 0.875rem;
   line-height: 1.6;
+}
+
+/* Stats */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 2rem;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.2;
+}
+
+.stat-label {
+  color: var(--gray-600);
+  font-size: 0.9375rem;
+  margin-top: 0.25rem;
+}
+
+.stat-note {
+  color: var(--gray-600);
+  font-size: 0.8125rem;
+  font-style: italic;
+  margin-top: 0.25rem;
 }
 
 /* Contact Form */
@@ -426,5 +480,9 @@ footer h4 {
 
   section {
     padding: 3rem 0;
+  }
+
+  .stat-value {
+    font-size: 2rem;
   }
 }
