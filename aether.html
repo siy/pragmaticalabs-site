@@ -267,17 +267,12 @@ aether update complete &lt;id&gt;        # 100% to v2</code></pre>
       </div>
       <div class="stats">
         <div>
-          <div class="stat-value">6.5K</div>
-          <div class="stat-label">Requests/second</div>
-          <div class="stat-note">Single laptop, incl. load generator</div>
-        </div>
-        <div>
-          <div class="stat-value">&lt;1ms</div>
-          <div class="stat-label">Average latency</div>
+          <div class="stat-value">Sub-ms</div>
+          <div class="stat-label">Invocation latency</div>
           <div class="stat-note">End-to-end, Forge simulator</div>
         </div>
         <div>
-          <div class="stat-value">81</div>
+          <div class="stat-value">80+</div>
           <div class="stat-label">End-to-end tests</div>
           <div class="stat-note">Real 5-node Podman clusters</div>
         </div>
@@ -286,8 +281,13 @@ aether update complete &lt;id&gt;        # 100% to v2</code></pre>
           <div class="stat-label">Request success rate</div>
           <div class="stat-note">During rolling restarts</div>
         </div>
+        <div>
+          <div class="stat-value">500+</div>
+          <div class="stat-label">Total tests</div>
+          <div class="stat-note">Unit + integration + E2E</div>
+        </div>
       </div>
-      <p class="text-center" style="font-size: 0.875rem;">Performance as of v0.15.1. Tests cover cluster formation, leader election, node failures, network partitions, rolling updates, and chaos scenarios.</p>
+      <p class="text-center" style="font-size: 0.875rem;">Tests cover cluster formation, leader election, node failures, network partitions, rolling updates, and chaos scenarios.</p>
     </div>
   </section>
 
