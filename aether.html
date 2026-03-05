@@ -103,7 +103,7 @@ public interface OrderService {
     <div class="container">
       <div class="section-header">
         <h2>Under The Hood</h2>
-        <p>Five architectural decisions make this possible.</p>
+        <p>Seven architectural decisions make this possible.</p>
       </div>
       <ul class="features-list">
         <li><strong>Consensus KV Store.</strong> Single source of truth for configuration, deployment state, and service discovery. Based on the Rabia protocol — a leaderless consensus algorithm. Any node can propose; no external config servers, no etcd, no Consul.</li>
@@ -111,6 +111,9 @@ public interface OrderService {
         <li><strong>ClassLoader Isolation.</strong> Each slice runs in its own classloader with child-first delegation. Two slices can use different versions of the same library without conflict. No dependency conflicts, no classpath hell.</li>
         <li><strong>Declarative Deployment.</strong> Blueprints — TOML files — describe the desired state. Apply with one command. The cluster converges automatically.</li>
         <li><strong>Infrastructure Independence.</strong> Aether nodes are identical — one deployment artifact at the infrastructure level. Node updates, runtime updates, and application deployments run on completely independent schedules.</li>
+        <li><strong>Node Lifecycle Management.</strong> Nodes move through JOINING, ON_DUTY, DRAINING, DECOMMISSIONED, SHUTTING_DOWN states. Graceful drain respects disruption budgets. Liveness and readiness probes built in.</li>
+        <li><strong>Native Async Database.</strong> Built-in async PostgreSQL driver with binary wire protocol. Three integration paths: direct async (zero adapter overhead), R2DBC adapter, and jOOQ. LISTEN/NOTIFY support for reactive event-driven patterns.</li>
+        <li><strong>API Key Authentication.</strong> RBAC Tier 1 with SHA-256 hashed API keys, per-key roles, audit logging, and WebSocket authentication protocol.</li>
       </ul>
       <div class="two-col mt-2">
         <div>
@@ -219,12 +222,12 @@ aether update complete &lt;id&gt;        # 100% to v2</code></pre>
         <div class="card">
           <div class="card-icon">E</div>
           <h3>Ember</h3>
-          <p>Single-process runtime. Multiple logical nodes in the same JVM. Fast startup, standard debugger. Deploy slices alongside your existing application — the zero-risk entry point for legacy migration.</p>
+          <p>Embeddable cluster runtime with fluent builder API: <code>Ember.cluster(5).withH2().start()</code>. Multiple logical nodes in the same JVM. Fast startup, standard debugger. Deploy slices alongside your existing application — the zero-risk entry point for legacy migration.</p>
         </div>
         <div class="card">
           <div class="card-icon">F</div>
           <h3>Forge</h3>
-          <p>5-node cluster simulator on your laptop. Real consensus, real routing, real failure scenarios. Web dashboard with live metrics. Chaos injection — kill nodes, crash leaders, trigger rolling restarts.</p>
+          <p>5-node cluster simulator on your laptop with built-in passive load balancer. Real consensus, real routing, real failure scenarios. Web dashboard with live metrics. Chaos injection — kill nodes, crash leaders, trigger rolling restarts.</p>
         </div>
         <div class="card">
           <div class="card-icon">A</div>
@@ -232,27 +235,37 @@ aether update complete &lt;id&gt;        # 100% to v2</code></pre>
           <p>Production cluster. Same slices, same code, different scale. Your code doesn't know which environment it's running in. Moving from Ember to Aether is a configuration change, not a code change.</p>
         </div>
       </div>
+      <div class="section-header mt-2">
+        <h3>See It In Action</h3>
+        <p>End-to-end walkthrough: cluster setup, slice deployment, load testing with k6.</p>
+      </div>
       <div class="video-embed">
-        <iframe width="640" height="360" allowfullscreen src="https://www.awesomescreenshot.com/embed?id=49013877&shareKey=a0b1105613f83dccc3948d6d41ebf75c"></iframe>
+        <iframe width="640" height="360" allowfullscreen src="https://www.awesomescreenshot.com/embed?id=50013933&shareKey=f16cf0ff602db9c4b7ff4928ecb382a7"></iframe>
+      </div>
+      <div class="screenshot-embed mt-2">
+        <img src="image/topology-dashboard.png" alt="Aether Topology Dashboard — live data-flow graph showing endpoints, slices, resources, and pub-sub topics">
+        <p class="text-center" style="font-size: 0.875rem; margin-top: 0.75rem;">Topology Dashboard — compile-time data-flow graph with swim-lane layout, pub-sub routing, and search filtering.</p>
       </div>
       <div class="two-col mt-2">
         <div>
           <h3>Tooling</h3>
           <ul class="features-list">
-            <li><strong>aether</strong> — 37 CLI commands, single-command and REPL modes</li>
+            <li><strong>aether</strong> — 60+ CLI commands across 14 command groups, single-command and REPL modes</li>
             <li><strong>aether-node</strong> — run cluster nodes</li>
             <li><strong>aether-forge</strong> — local simulator with visual dashboard</li>
-            <li><strong>Management API</strong> — 30+ REST endpoints for full programmatic control</li>
+            <li><strong>Passive Load Balancer</strong> — cluster-aware, smart routing via binary protocol, automatic failover on node departure. Built into Ember and Forge</li>
+            <li><strong>Management API</strong> — 60+ REST endpoints across 13 route classes</li>
           </ul>
         </div>
         <div>
           <h3>Observability</h3>
           <ul class="features-list">
-            <li>Prometheus-compatible metrics export</li>
-            <li>Per-method invocation tracking (P50/P95/P99)</li>
-            <li>Push-based metrics at 1-second intervals</li>
-            <li>Configurable slow-invocation detection</li>
-            <li>Dynamic LOG/METRICS toggles per method at runtime — no redeployment</li>
+            <li>Prometheus-compatible metrics export (Micrometer)</li>
+            <li>Per-method invocation tracking (P50/P95/P99) with slow invocation detection</li>
+            <li>Sampling-based distributed tracing with adaptive per-node sampling</li>
+            <li>RBAC with API key authentication, SHA-256 hashing, and audit logging</li>
+            <li>Cluster event aggregator — 11 event types with REST API and WebSocket real-time feed</li>
+            <li>Dynamic log levels per logger at runtime — no restart required</li>
           </ul>
         </div>
       </div>
@@ -267,19 +280,19 @@ aether update complete &lt;id&gt;        # 100% to v2</code></pre>
       </div>
       <div class="stats">
         <div>
-          <div class="stat-value">Sub-ms</div>
-          <div class="stat-label">Invocation latency</div>
-          <div class="stat-note">End-to-end, Forge simulator</div>
+          <div class="stat-value">5K req/s</div>
+          <div class="stat-label">Sustained throughput</div>
+          <div class="stat-note">Real PostgreSQL, mixed read/write</div>
         </div>
         <div>
-          <div class="stat-value">80+</div>
-          <div class="stat-label">End-to-end tests</div>
-          <div class="stat-note">Real 5-node Podman clusters</div>
+          <div class="stat-value">&lt;5ms</div>
+          <div class="stat-label">p95 latency at 2K req/s</div>
+          <div class="stat-note">With real database operations</div>
         </div>
         <div>
-          <div class="stat-value">~100%</div>
-          <div class="stat-label">Request success rate</div>
-          <div class="stat-note">During rolling restarts</div>
+          <div class="stat-value">0.00%</div>
+          <div class="stat-label">Error rate</div>
+          <div class="stat-note">Across 1.57M requests</div>
         </div>
         <div>
           <div class="stat-value">500+</div>
@@ -287,7 +300,7 @@ aether update complete &lt;id&gt;        # 100% to v2</code></pre>
           <div class="stat-note">Unit + integration + E2E</div>
         </div>
       </div>
-      <p class="text-center" style="font-size: 0.875rem;">Tests cover cluster formation, leader election, node failures, network partitions, rolling updates, and chaos scenarios.</p>
+      <p class="text-center" style="font-size: 0.875rem;">Benchmarked on a single laptop with database, cluster, and load generator co-located. Real-world performance has headroom. Tests cover cluster formation, leader election, node failures, network partitions, rolling updates, and chaos scenarios.</p>
     </div>
   </section>
 
