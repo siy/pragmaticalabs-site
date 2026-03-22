@@ -45,7 +45,7 @@
           <h2>The Coupling Trap</h2>
           <p>Every Java microservice carries a heavy coat of infrastructure: web servers, serialization, DI containers, service discovery, config management, metrics, retry logic, circuit breakers.</p>
           <p>Your <code>pom.xml</code> doesn't distinguish business dependencies from infrastructure dependencies. They compile together, deploy together, and break together. A security patch in Netty requires rebuilding every service that embeds a web server — which is all of them.</p>
-          <p>Spring's DI fights with Kubernetes service mesh for routing control. Your cloud SDK's retry logic conflicts with Resilience4j. Every layer claims authority over the same cross-cutting concerns, and the conflicts surface as bugs in production — not during development.</p>
+          <p>DI frameworks fight with service meshes for routing control. Cloud SDK retry logic conflicts with application-level resilience libraries. Every layer claims authority over the same cross-cutting concerns, and the conflicts surface as bugs in production — not during development.</p>
         </div>
         <div>
           <h2>The Way Out</h2>
@@ -61,7 +61,7 @@
     <div class="container">
       <div class="section-header">
         <h2>What You Write</h2>
-        <p>An interface annotated with <code>@Slice</code>, plus business logic implementation.</p>
+        <p>A slice is a Java interface — the same mental model as a service. Define methods, declare dependencies, implement business logic. If you've written a Spring service, you can write a slice.</p>
       </div>
       <div class="code-block">
         <pre><code>@Slice
@@ -94,7 +94,7 @@ public interface OrderService {
             </ul>
           </div>
         </div>
-        <p>A method call via imported interface is the only visible contract. The only design requirement: slice methods should be idempotent — enabling retry, scaling, and fault tolerance to work transparently.</p>
+        <p>A method call via imported interface is the only visible contract. Not message passing, not actors, not a new programming paradigm — typed Java interfaces with request/response semantics. Your existing service-based designs, interaction patterns, and team knowledge transfer directly. The only design requirement: slice methods should be idempotent — enabling retry, scaling, and fault tolerance to work transparently.</p>
       </div>
     </div>
   </section>
@@ -103,17 +103,19 @@ public interface OrderService {
     <div class="container">
       <div class="section-header">
         <h2>Under The Hood</h2>
-        <p>Seven architectural decisions make this possible.</p>
+        <p>Ten architectural decisions make this possible.</p>
       </div>
       <ul class="features-list">
-        <li><strong>Consensus KV Store.</strong> Single source of truth for configuration, deployment state, and service discovery. Based on the Rabia protocol — a leaderless consensus algorithm. Any node can propose; no external config servers, no etcd, no Consul.</li>
-        <li><strong>Built-in Artifact Repository.</strong> DHT-based storage with configurable replication and integrity verification. No external Nexus or Artifactory. In development, slices resolve from your local Maven repository. In production, the cluster is self-contained.</li>
+        <li><strong>Consensus KV Store.</strong> Single source of truth for configuration, deployment state, and service discovery. Based on the Rabia protocol — a leaderless consensus algorithm. Any node can propose. Self-contained — no external coordination services required.</li>
+        <li><strong>Two-Layer Topology.</strong> Core nodes run Rabia consensus (3-9 nodes). Worker groups scale independently via SWIM gossip protocol — thousands of nodes, O(1) failure detection, zero consensus overhead. Governors elected deterministically, no election messages.</li>
+        <li><strong>Built-in Artifact Repository.</strong> DHT-based storage with configurable replication and integrity verification. In development, slices resolve from your local Maven repository. In production, the cluster stores and distributes artifacts internally.</li>
         <li><strong>ClassLoader Isolation.</strong> Each slice runs in its own classloader with child-first delegation. Two slices can use different versions of the same library without conflict. No dependency conflicts, no classpath hell.</li>
         <li><strong>Declarative Deployment.</strong> Blueprints — TOML files — describe the desired state. Apply with one command. The cluster converges automatically.</li>
         <li><strong>Infrastructure Independence.</strong> Aether nodes are identical — one deployment artifact at the infrastructure level. Node updates, runtime updates, and application deployments run on completely independent schedules.</li>
         <li><strong>Node Lifecycle Management.</strong> Nodes move through JOINING, ON_DUTY, DRAINING, DECOMMISSIONED, SHUTTING_DOWN states. Graceful drain respects disruption budgets. Liveness and readiness probes built in.</li>
-        <li><strong>Native Async Database.</strong> Built-in async PostgreSQL driver with binary wire protocol. Three integration paths: direct async (zero adapter overhead), R2DBC adapter, and jOOQ. LISTEN/NOTIFY support for reactive event-driven patterns.</li>
-        <li><strong>API Key Authentication.</strong> RBAC Tier 1 with SHA-256 hashed API keys, per-key roles, audit logging, and WebSocket authentication protocol.</li>
+        <li><strong>Native Async Database.</strong> Built-in async PostgreSQL driver with binary wire protocol and built-in pipelining — multiple queries in flight per connection without round-trip serialization. No external connection pooler needed — pipelining is handled inside the driver, one fewer component to deploy, configure, and monitor. Three integration paths: direct async (zero adapter overhead), R2DBC adapter, and jOOQ. LISTEN/NOTIFY support for reactive event-driven patterns.</li>
+        <li><strong>Transport Security.</strong> Mutual TLS for all node-to-node TCP communication — derived from a shared cluster secret via HKDF, no external PKI required. SWIM gossip encrypted with AES-256-GCM and zero-downtime key rotation.</li>
+        <li><strong>API Key Authentication.</strong> RBAC with SHA-256 hashed API keys, per-key roles, audit logging, and WebSocket authentication protocol.</li>
       </ul>
       <div class="two-col mt-2">
         <div>
@@ -143,8 +145,9 @@ instances = 5</code></pre>
       <div class="two-col">
         <div>
           <h2>The 50% Rule</h2>
-          <p>The system survives failure of less than half the nodes. Not graceful degradation — actual redundancy. A 5-node cluster tolerates 2 simultaneous failures. A 7-node cluster tolerates 3.</p>
+          <p>The system survives failure of less than half the core nodes. Not graceful degradation — actual redundancy. A 5-node cluster tolerates 2 simultaneous failures. A 7-node cluster tolerates 3.</p>
           <p>When a node fails, recovery is automatic. Requests are immediately retried on healthy nodes. A replacement is provisioned, connects to peers, restores state from a cluster snapshot, and begins serving traffic. No human intervention required.</p>
+          <p>All inter-node communication secured with mutual TLS derived from a shared cluster secret — no external PKI. SWIM gossip encrypted with AES-256-GCM with zero-downtime key rotation.</p>
         </div>
         <div>
           <h2>Zero-Downtime Updates</h2>
@@ -168,16 +171,16 @@ aether update complete &lt;id&gt;        # 100% to v2</code></pre>
       </div>
       <div class="two-col">
         <div>
-          <h3>Two Dimensions</h3>
+          <h3>Three Dimensions</h3>
           <p><strong>Slice scaling</strong> — spin up more instances of a specific slice on existing nodes. Classes are already loaded; scaling takes milliseconds.</p>
           <p><strong>Node scaling</strong> — add more machines to the cluster. The node connects, restores state, and begins accepting work.</p>
-          <p>Independent controls, combined effect. No coordination between the two dimensions required.</p>
+          <p><strong>Worker group scaling</strong> — add worker groups that scale independently via SWIM gossip. Core stays at 5-9 nodes for consensus; workers scale to thousands with zero consensus overhead.</p>
         </div>
         <div>
           <h3>Three Tiers of Intelligence</h3>
           <ul class="features-list">
             <li><strong>Tier 1 — Decision Tree</strong> (1-second intervals). Reactive scaling based on CPU, latency, queue depth, and error rate. Deterministic, fast, always reliable.</li>
-            <li><strong>Tier 2 — TTM Predictor</strong> (60-second intervals). ONNX-based ML model analyzing a 60-minute sliding window. Forecasts load and adjusts thresholds preemptively. Scale <em>before</em> the spike, not after.</li>
+            <li><strong>Tier 2 — TTM Predictor</strong> (60-second intervals). ONNX-based ML model analyzing a 2-hour sliding window with 11-metric feature vector. Variance-based confidence scoring. Forecasts load and adjusts thresholds preemptively. Scale <em>before</em> the spike, not after.</li>
             <li><strong>Tier 3 — LLM-based</strong> (planned). Long-term capacity planning, seasonal patterns, anomaly investigation.</li>
           </ul>
           <p>If TTM fails, the Decision Tree continues with default thresholds. No scaling disruption.</p>
@@ -190,7 +193,7 @@ aether update complete &lt;id&gt;        # 100% to v2</code></pre>
     <div class="container">
       <div class="section-header">
         <h2>For Every Project</h2>
-        <p>Same slice model, different granularity. Legacy and greenfield coexist in the same cluster.</p>
+        <p>Slices are services — right-sized, without the infrastructure tax. Your existing service boundaries, API contracts, and domain decomposition apply directly. Legacy and greenfield coexist in the same cluster.</p>
       </div>
       <div class="two-col">
         <div>
@@ -262,8 +265,8 @@ aether update complete &lt;id&gt;        # 100% to v2</code></pre>
           <ul class="features-list">
             <li>Prometheus-compatible metrics export (Micrometer)</li>
             <li>Per-method invocation tracking (P50/P95/P99) with slow invocation detection</li>
+            <li>Dynamic aspects — toggle METRICS, TRACING, LOGGING per method at runtime without restart or redeployment</li>
             <li>Sampling-based distributed tracing with adaptive per-node sampling</li>
-            <li>RBAC with API key authentication, SHA-256 hashing, and audit logging</li>
             <li>Cluster event aggregator — 11 event types with REST API and WebSocket real-time feed</li>
             <li>Dynamic log levels per logger at runtime — no restart required</li>
           </ul>
@@ -280,27 +283,27 @@ aether update complete &lt;id&gt;        # 100% to v2</code></pre>
       </div>
       <div class="stats">
         <div>
-          <div class="stat-value">5K req/s</div>
+          <div class="stat-value">8K req/s</div>
           <div class="stat-label">Sustained throughput</div>
           <div class="stat-note">Real PostgreSQL, mixed read/write</div>
         </div>
         <div>
           <div class="stat-value">&lt;5ms</div>
-          <div class="stat-label">p95 latency at 2K req/s</div>
+          <div class="stat-label">p95 latency at 8K req/s</div>
           <div class="stat-note">With real database operations</div>
         </div>
         <div>
           <div class="stat-value">0.00%</div>
           <div class="stat-label">Error rate</div>
-          <div class="stat-note">Across 1.57M requests</div>
+          <div class="stat-note">Across 5.9M requests</div>
         </div>
         <div>
           <div class="stat-value">500+</div>
           <div class="stat-label">Total tests</div>
-          <div class="stat-note">Unit + integration + E2E</div>
+          <div class="stat-note">Unit + integration + 28 E2E against real clusters</div>
         </div>
       </div>
-      <p class="text-center" style="font-size: 0.875rem;">Benchmarked on a single laptop with database, cluster, and load generator co-located. Real-world performance has headroom. Tests cover cluster formation, leader election, node failures, network partitions, rolling updates, and chaos scenarios.</p>
+      <p class="text-center" style="font-size: 0.875rem;">Benchmarked on a laptop (i7-11800H, 32GB RAM) with database, cluster, and load generator co-located. Scales to 15K req/s with sub-50ms p95. Real-world performance has headroom. Tests cover cluster formation, leader election, node failures, network partitions, rolling updates, and chaos scenarios.</p>
     </div>
   </section>
 

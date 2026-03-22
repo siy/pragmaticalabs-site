@@ -67,7 +67,7 @@ public interface OrderService {
           <p>No HTTP clients. No service discovery. No retry logic. No circuit breakers. No serialization code. A method call is the only visible contract.</p>
           <div class="stats mt-2">
             <div>
-              <div class="stat-value">5K req/s</div>
+              <div class="stat-value">8K req/s</div>
               <div class="stat-label">Real PostgreSQL</div>
             </div>
             <div>
@@ -119,9 +119,10 @@ public interface OrderService {
           <h3>Pragmatica Aether</h3>
           <p>Distributed Java runtime that returns Java to its natural habitat. Write business logic as slices, deploy distributed. The runtime handles everything else.</p>
           <ul class="features-list">
+            <li>Two-layer topology — core consensus + worker groups scaling to thousands</li>
             <li>ML-based predictive autoscaling</li>
             <li>Zero-downtime rolling updates</li>
-            <li>Fault tolerance — survives loss of half the nodes</li>
+            <li>mTLS and encrypted gossip — no external PKI</li>
             <li>Legacy migration in one sprint</li>
           </ul>
           <a href="aether.html" class="btn btn-outline mt-2">Learn More</a>
