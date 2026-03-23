@@ -103,19 +103,20 @@ public interface OrderService {
     <div class="container">
       <div class="section-header">
         <h2>Under The Hood</h2>
-        <p>Ten architectural decisions make this possible.</p>
+        <p>Eleven architectural decisions make this possible.</p>
       </div>
       <ul class="features-list">
         <li><strong>Consensus KV Store.</strong> Single source of truth for configuration, deployment state, and service discovery. Based on the Rabia protocol — a leaderless consensus algorithm. Any node can propose. Self-contained — no external coordination services required.</li>
-        <li><strong>Two-Layer Topology.</strong> Core nodes run Rabia consensus (3-9 nodes). Worker groups scale independently via SWIM gossip protocol — thousands of nodes, O(1) failure detection, zero consensus overhead. Governors elected deterministically, no election messages.</li>
+        <li><strong>Two-Layer Topology.</strong> Core nodes run Rabia consensus (3-9 nodes). Worker groups scale independently via SWIM gossip protocol — thousands of nodes, O(1) failure detection, zero consensus overhead. Governors elected deterministically, no election messages. Proven with 12-node Docker scaling test: zero failures, zero SWIM faults.</li>
         <li><strong>Built-in Artifact Repository.</strong> DHT-based storage with configurable replication and integrity verification. In development, slices resolve from your local Maven repository. In production, the cluster stores and distributes artifacts internally.</li>
         <li><strong>ClassLoader Isolation.</strong> Each slice runs in its own classloader with child-first delegation. Two slices can use different versions of the same library without conflict. No dependency conflicts, no classpath hell.</li>
-        <li><strong>Declarative Deployment.</strong> Blueprints — TOML files — describe the desired state. Apply with one command. The cluster converges automatically.</li>
-        <li><strong>Infrastructure Independence.</strong> Aether nodes are identical — one deployment artifact at the infrastructure level. Node updates, runtime updates, and application deployments run on completely independent schedules.</li>
+        <li><strong>Declarative Deployment.</strong> Blueprints packaged as deployable JAR artifacts — containing slice configuration, database migration scripts, and application config. Deploy with one command. The cluster resolves artifacts, runs schema migrations, and converges to the desired state automatically.</li>
+        <li><strong>Infrastructure Independence.</strong> A single <code>aether-node.jar</code> runs as both core and worker — the node discovers its role from the cluster topology. Node updates, runtime updates, and application deployments run on completely independent schedules.</li>
         <li><strong>Node Lifecycle Management.</strong> Nodes move through JOINING, ON_DUTY, DRAINING, DECOMMISSIONED, SHUTTING_DOWN states. Graceful drain respects disruption budgets. Liveness and readiness probes built in.</li>
         <li><strong>Native Async Database.</strong> Built-in async PostgreSQL driver with binary wire protocol and built-in pipelining — multiple queries in flight per connection without round-trip serialization. No external connection pooler needed — pipelining is handled inside the driver, one fewer component to deploy, configure, and monitor. Three integration paths: direct async (zero adapter overhead), R2DBC adapter, and jOOQ. LISTEN/NOTIFY support for reactive event-driven patterns.</li>
         <li><strong>Transport Security.</strong> Mutual TLS for all node-to-node TCP communication — derived from a shared cluster secret via HKDF, no external PKI required. SWIM gossip encrypted with AES-256-GCM and zero-downtime key rotation.</li>
-        <li><strong>API Key Authentication.</strong> RBAC with SHA-256 hashed API keys, per-key roles, audit logging, and WebSocket authentication protocol.</li>
+        <li><strong>In-Memory Streaming.</strong> Ordered, replayable, consumer-paced streams as a first-class resource. Off-heap ring buffers, push-based delivery, dead-letter handling. Declared in blueprints, scaled by the runtime — no external message broker needed.</li>
+        <li><strong>RBAC and Audit.</strong> Three hierarchical roles (ADMIN/OPERATOR/VIEWER) with per-route enforcement. SHA-256 hashed API keys, operational audit trail with 7 event types, cluster-wide event aggregation.</li>
       </ul>
       <div class="two-col mt-2">
         <div>
@@ -133,8 +134,8 @@ instances = 5</code></pre>
           </div>
         </div>
         <div>
-          <p><code>aether blueprint apply commerce.toml</code></p>
-          <p>The cluster resolves artifacts, loads slices, distributes instances across nodes, registers routes, and starts serving traffic. Convergence to desired state is automatic.</p>
+          <p><code>aether blueprint deploy org.example:commerce:1.0.0:blueprint</code></p>
+          <p>The blueprint artifact carries slice configs, database migrations, and application settings. The cluster resolves artifacts, runs schema migrations, loads slices, distributes instances across nodes, registers routes, and starts serving traffic. One artifact, one command.</p>
         </div>
       </div>
     </div>
@@ -151,14 +152,14 @@ instances = 5</code></pre>
         </div>
         <div>
           <h2>Zero-Downtime Updates</h2>
-          <p>Rolling updates leverage fault tolerance for safe deployments with weighted traffic routing.</p>
-          <div class="code-block">
-            <pre><code>aether update start org.example:order-processor 2.0.0
-aether update routing &lt;id&gt; -r 1:3  # 25% to v2
-aether update routing &lt;id&gt; -r 1:1  # 50/50
-aether update complete &lt;id&gt;        # 100% to v2</code></pre>
-          </div>
-          <p>Deploy during business hours. Shift traffic gradually. If health degrades — instant rollback with one command.</p>
+          <p>Four deployment strategies, built in:</p>
+          <ul class="features-list">
+            <li><strong>Rolling</strong> — weighted traffic routing with gradual shift</li>
+            <li><strong>Canary</strong> — progressive stages (1% → 5% → 25% → 50% → 100%) with automatic health evaluation and auto-rollback</li>
+            <li><strong>Blue-green</strong> — atomic traffic switchover in ~100ms via single consensus round</li>
+            <li><strong>A/B testing</strong> — deterministic traffic split by request context with per-variant metrics</li>
+          </ul>
+          <p>Deploy during business hours. If health degrades — instant rollback with one command.</p>
         </div>
       </div>
     </div>
@@ -225,7 +226,7 @@ aether update complete &lt;id&gt;        # 100% to v2</code></pre>
         <div class="card">
           <div class="card-icon">E</div>
           <h3>Ember</h3>
-          <p>Embeddable cluster runtime with fluent builder API: <code>Ember.cluster(5).withH2().start()</code>. Multiple logical nodes in the same JVM. Fast startup, standard debugger. Deploy slices alongside your existing application — the zero-risk entry point for legacy migration.</p>
+          <p>Embeddable cluster runtime with fluent builder API. Multiple logical nodes in the same JVM. Fast startup, standard debugger. Deploy slices alongside your existing application — the zero-risk entry point for legacy migration.</p>
         </div>
         <div class="card">
           <div class="card-icon">F</div>
