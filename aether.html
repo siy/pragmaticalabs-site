@@ -103,7 +103,7 @@ public interface OrderService {
     <div class="container">
       <div class="section-header">
         <h2>Under The Hood</h2>
-        <p>Eleven architectural decisions make this possible.</p>
+        <p>Ten architectural decisions make this possible.</p>
       </div>
       <ul class="features-list">
         <li><strong>Consensus KV Store.</strong> Single source of truth for configuration, deployment state, and service discovery. Based on the Rabia protocol — a leaderless consensus algorithm. Any node can propose. Self-contained — no external coordination services required.</li>
@@ -115,7 +115,6 @@ public interface OrderService {
         <li><strong>Node Lifecycle Management.</strong> Nodes move through JOINING, ON_DUTY, DRAINING, DECOMMISSIONED, SHUTTING_DOWN states. Graceful drain respects disruption budgets. Liveness and readiness probes built in.</li>
         <li><strong>Native Async Database.</strong> Built-in async PostgreSQL driver with binary wire protocol and built-in pipelining — multiple queries in flight per connection without round-trip serialization. No external connection pooler needed — pipelining is handled inside the driver, one fewer component to deploy, configure, and monitor. Three integration paths: direct async (zero adapter overhead), R2DBC adapter, and jOOQ. LISTEN/NOTIFY support for reactive event-driven patterns.</li>
         <li><strong>Transport Security.</strong> Mutual TLS for all node-to-node TCP communication — derived from a shared cluster secret via HKDF, no external PKI required. SWIM gossip encrypted with AES-256-GCM and zero-downtime key rotation.</li>
-        <li><strong>In-Memory Streaming.</strong> Ordered, replayable, consumer-paced streams as a first-class resource. Off-heap ring buffers, push-based delivery, dead-letter handling. Declared in blueprints, scaled by the runtime — no external message broker needed.</li>
         <li><strong>RBAC and Audit.</strong> Three hierarchical roles (ADMIN/OPERATOR/VIEWER) with per-route enforcement. SHA-256 hashed API keys, operational audit trail with 7 event types, cluster-wide event aggregation.</li>
       </ul>
       <div class="two-col mt-2">
