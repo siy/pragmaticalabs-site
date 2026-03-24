@@ -1,18 +1,24 @@
 /* Pragmatica Labs - Brand Stylesheet */
 
 :root {
+  /* Brand */
   --navy: #1e3a5f;
   --navy-dark: #152a45;
   --navy-light: #2a4a73;
   --amber: #f59e0b;
   --amber-dark: #d97706;
   --amber-light: #fbbf24;
-  --white: #ffffff;
-  --gray-50: #f9fafb;
-  --gray-100: #f3f4f6;
-  --gray-200: #e5e7eb;
-  --gray-600: #4b5563;
-  --gray-800: #1f2937;
+  /* Tinted neutrals — every neutral carries a trace of navy */
+  --white: #f9fafc;
+  --gray-50: #f5f6fa;
+  --gray-100: #eef0f5;
+  --gray-200: #dde1eb;
+  --gray-600: #4a5468;
+  --gray-800: #1a2840;
+  /* Shadows — navy-tinted, never pure black */
+  --shadow-sm: 0 1px 3px rgba(20,40,70,0.08), 0 0 0 1px rgba(20,40,70,0.04);
+  --shadow-md: 0 4px 16px rgba(20,40,70,0.10), 0 1px 4px rgba(20,40,70,0.06);
+  --shadow-lg: 0 12px 40px rgba(20,40,70,0.12), 0 2px 8px rgba(20,40,70,0.06);
 }
 
 * {
@@ -224,13 +230,13 @@ section.alt {
   background: var(--white);
   border-radius: 8px;
   padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-lg);
 }
 
 .card h3 {
@@ -338,7 +344,7 @@ section.alt {
 .screenshot-embed img {
   width: 100%;
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
 }
 
 /* Code Block */
