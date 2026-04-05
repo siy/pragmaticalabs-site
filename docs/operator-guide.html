@@ -80,7 +80,13 @@ aether artifact upload target/my-service-1.0.0.jar
 aether deploy target/blueprint.toml
 
 # Or use a strategy
-aether deploy target/blueprint.toml --strategy canary</code></pre>
+aether deploy target/blueprint.toml --strategy canary
+
+# Deployment lifecycle
+aether deploy status          # Show deployment status
+aether deploy promote         # Advance to next stage (canary/rolling)
+aether deploy rollback        # Rollback deployment
+aether deploy complete        # Finalize deployment</code></pre>
       </div>
 
       <h3>Deployment Strategies</h3>
@@ -90,8 +96,8 @@ aether deploy target/blueprint.toml --strategy canary</code></pre>
         <tbody>
           <tr><td>Immediate</td><td>All instances at once</td><td>Manual redeploy previous version</td></tr>
           <tr><td>Rolling</td><td>Weighted traffic shift with health thresholds</td><td><code>aether rollback</code></td></tr>
-          <tr><td>Canary</td><td>1% → 5% → 25% → 50% → 100% with auto-evaluation</td><td>Automatic on health degradation</td></tr>
-          <tr><td>Blue-green</td><td>Atomic ~100ms switchover via consensus</td><td>Instant switch back</td></tr>
+          <tr><td>Canary</td><td>Progressive traffic shift through configurable stages (e.g., 5% → 25% → 50% → 100%) with auto-evaluation</td><td>Automatic on health degradation</td></tr>
+          <tr><td>Blue-green</td><td>Atomic switchover via consensus (~5ms routing change, plus drain for in-flight requests)</td><td>Instant switch back</td></tr>
           <tr><td>A/B testing</td><td>Deterministic split by request context</td><td>Remove variant</td></tr>
         </tbody>
       </table>
@@ -156,7 +162,7 @@ aether thresholds set cpu_critical 0.90</code></pre>
       <table class="docs-table">
         <thead><tr><th>Provider</th><th>Compute</th><th>Secrets</th><th>Load Balancer</th><th>Discovery</th><th>Certificates</th></tr></thead>
         <tbody>
-          <tr><td>Hetzner</td><td>Yes</td><td>—</td><td>Yes</td><td>Yes (labels)</td><td>—</td></tr>
+          <tr><td>Hetzner</td><td>Yes</td><td>Yes (env vars)</td><td>Yes</td><td>Yes (labels)</td><td>Self-signed (HKDF)</td></tr>
           <tr><td>AWS</td><td>EC2</td><td>Secrets Manager</td><td>ELBv2</td><td>Yes</td><td>ACM</td></tr>
           <tr><td>GCP</td><td>Compute Engine</td><td>Secret Manager</td><td>NEGs</td><td>Yes</td><td>Certificate Manager</td></tr>
           <tr><td>Azure</td><td>VMs</td><td>Key Vault</td><td>Load Balancers</td><td>Resource Graph</td><td>Key Vault</td></tr>
@@ -199,17 +205,17 @@ aether node shutdown node-3</code></pre>
 
       <h2 id="backup">Backup &amp; Recovery</h2>
 
-      <p>Cluster metadata is continuously serialized to a local git repository — providing versioning, history, diffs, and optional remote push. Automatic periodic + on-change triggers.</p>
+      <p>Cluster metadata is periodically serialized to a local git repository — triggered on state changes and at configurable intervals. Git provides versioning, history, diffs, and optional remote push.</p>
 
       <div class="code-block">
-        <pre><code># Manual backup
-aether backup create
+        <pre><code># Trigger manual backup
+aether backup trigger
 
-# List backups
+# List backups (shows git commit history)
 aether backup list
 
-# Restore from backup
-aether backup restore --timestamp 2026-04-05T10:30:00Z</code></pre>
+# Restore from backup (by commit ID)
+aether backup restore abc1234</code></pre>
       </div>
 
       <h2 id="next-steps">Next Steps</h2>
@@ -221,7 +227,7 @@ aether backup restore --timestamp 2026-04-05T10:30:00Z</code></pre>
         </a>
         <a href="feature-catalog.html" class="docs-card">
           <h3>Feature Catalog</h3>
-          <p>172 capabilities with implementation status.</p>
+          <p>173 capabilities with implementation status.</p>
         </a>
         <a href="../contact.html" class="docs-card">
           <h3>Pilot Program</h3>
