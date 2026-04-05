@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pragmatica Aether | Unified Application Runtime for Java | Pragmatica Labs</title>
   <meta name="description" content="Pragmatica Aether — the unified application runtime for Java. Write business logic as slices, deploy distributed. Predictive autoscaling, fault tolerance, zero-downtime deployments.">
-  <meta property="og:title" content="Pragmatica Aether — Let Java Be Java">
-  <meta property="og:description" content="Distributed Java runtime that returns Java to its natural habitat. Write business logic as slices, deploy distributed.">
+  <meta property="og:title" content="Pragmatica Aether — The Unified Application Runtime for Java">
+  <meta property="og:description" content="Write business logic as slices, deploy distributed. One runtime replaces your entire infrastructure stack.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://pragmaticalabs.io/aether.html">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,6 +36,10 @@
       <p class="hero-subtitle">The Unified Application Runtime for Java</p>
       <p>Java was designed for managed environments. Applets ran in browsers. Servlets ran in app servers. EJBs ran in containers. The fat-jar era threw that away — we started bundling web servers, serialization, service discovery, and configuration management into every application, then wrapping it all in Docker.</p>
       <p>Aether returns Java to its natural habitat. Applications handle business logic. The runtime handles everything else.</p>
+      <div class="mt-2">
+        <a href="docs/getting-started.html" class="btn btn-primary">Get Started</a>
+        <a href="docs/developer-guide.html" class="btn btn-secondary">Developer Guide</a>
+      </div>
     </div>
   </section>
 
@@ -43,16 +47,16 @@
     <div class="container">
       <div class="two-col">
         <div>
-          <h2>The Coupling Trap</h2>
+          <h2>The Problem</h2>
           <p>Every Java microservice carries a heavy coat of infrastructure: web servers, serialization, DI containers, service discovery, config management, metrics, retry logic, circuit breakers.</p>
-          <p>Your <code>pom.xml</code> doesn't distinguish business dependencies from infrastructure dependencies. They compile together, deploy together, and break together. A security patch in Netty requires rebuilding every service that embeds a web server — which is all of them.</p>
-          <p>DI frameworks fight with service meshes for routing control. Cloud SDK retry logic conflicts with application-level resilience libraries. Every layer claims authority over the same cross-cutting concerns, and the conflicts surface as bugs in production — not during development.</p>
+          <p>Your <code>pom.xml</code> doesn't distinguish business dependencies from infrastructure dependencies. They compile together, deploy together, and break together. A security patch in a web server library requires rebuilding every service.</p>
+          <p>DI frameworks fight with service meshes for routing control. Cloud SDK retry logic conflicts with application-level resilience libraries. The conflicts surface as bugs in production — not during development.</p>
         </div>
         <div>
-          <h2>The Way Out</h2>
-          <p>This is an architecture problem. Architecture problems have architectural solutions.</p>
+          <h2>The Architecture</h2>
           <p>Separate the layers. Let the runtime manage infrastructure — resource provisioning, scaling, transport, discovery, retries, circuit breakers, configuration, observability, security. None of these are application concerns.</p>
-          <p>Update Java — roll it out across nodes without touching applications. Update business logic — deploy new versions without touching infrastructure. Each independently, each without downtime. When layers don't share a deployment unit, they don't share a deployment schedule.</p>
+          <p>Update the runtime — roll it out across nodes without touching applications. Update business logic — deploy new versions without touching infrastructure. Each independently, each without downtime.</p>
+          <p>When layers don't share a deployment unit, they don't share a deployment schedule.</p>
         </div>
       </div>
     </div>
@@ -62,7 +66,7 @@
     <div class="container">
       <div class="section-header">
         <h2>What You Write</h2>
-        <p>A slice is a Java interface — the same mental model as a service. Define methods, declare dependencies, implement business logic. If you've written a Spring service, you can write a slice.</p>
+        <p>A slice is a Java interface — the same mental model as a service. If you've written a Spring service, you can write a slice.</p>
       </div>
       <div class="code-block">
         <pre><code>@Slice
@@ -72,8 +76,8 @@ public interface OrderService {
     static OrderService orderService(InventoryService inventory,
                                      PricingEngine pricing) {
         return request -&gt; inventory.check(request.items())
-                                   .flatMap(available -&gt; pricing.calculate(available))
-                                   .map(priced -&gt; OrderResult.placed(priced));
+                                   .flatMap(pricing::calculate)
+                                   .map(OrderResult::placed);
     }
 }</code></pre>
       </div>
@@ -95,7 +99,7 @@ public interface OrderService {
             </ul>
           </div>
         </div>
-        <p>A method call via imported interface is the only visible contract. Not message passing, not actors, not a new programming paradigm — typed Java interfaces with request/response semantics. Your existing service-based designs, interaction patterns, and team knowledge transfer directly. The only design requirement: slice methods should be idempotent — enabling retry, scaling, and fault tolerance to work transparently.</p>
+        <p>Typed Java interfaces with request/response semantics. Not message passing, not actors. Your existing service-based designs and team knowledge transfer directly. The only design requirement: slice methods should be idempotent.</p>
       </div>
     </div>
   </section>
@@ -104,7 +108,7 @@ public interface OrderService {
     <div class="container">
       <div class="section-header">
         <h2>Under The Hood</h2>
-        <p>Key architectural decisions that make this possible.</p>
+        <p>Key architectural decisions.</p>
       </div>
       <div class="two-col">
         <div>
@@ -145,7 +149,7 @@ instances = 5</code></pre>
           </div>
         </div>
         <div>
-          <p><code>aether blueprint deploy org.example:commerce:1.0.0:blueprint</code></p>
+          <p><code>aether deploy commerce-blueprint.jar</code></p>
           <p>The blueprint artifact carries slice configs, database migrations, and application settings. The cluster resolves artifacts, runs schema migrations, loads slices, distributes instances across nodes, registers routes, and starts serving traffic. One artifact, one command.</p>
         </div>
       </div>
@@ -156,21 +160,20 @@ instances = 5</code></pre>
     <div class="container">
       <div class="two-col">
         <div>
-          <h2>The 50% Rule</h2>
-          <p>The system survives failure of less than half the core nodes. Not graceful degradation — actual redundancy. A 5-node cluster tolerates 2 simultaneous failures. A 7-node cluster tolerates 3.</p>
-          <p>When a node fails, recovery is automatic. Requests are immediately retried on healthy nodes. A replacement is provisioned, connects to peers, restores state from a cluster snapshot, and begins serving traffic. No human intervention required.</p>
-          <p>All inter-node communication secured with mutual TLS derived from a shared cluster secret — no external PKI. SWIM gossip encrypted with AES-256-GCM with zero-downtime key rotation.</p>
+          <h2>Fault Tolerance</h2>
+          <p>The system survives failure of less than half the core nodes. A 5-node cluster tolerates 2 simultaneous failures. A 7-node cluster tolerates 3.</p>
+          <p>When a node fails, recovery is automatic. Requests retry on healthy nodes. A replacement provisions, connects, restores state, and begins serving traffic. No human intervention.</p>
         </div>
         <div>
-          <h2>Zero-Downtime Updates</h2>
-          <p>Four deployment strategies, built in:</p>
+          <h2>Zero-Downtime Deployments</h2>
+          <p>Four strategies, built in:</p>
           <ul class="features-list">
             <li><strong>Rolling</strong> — weighted traffic routing with gradual shift</li>
-            <li><strong>Canary</strong> — progressive traffic shift through configurable stages with automatic health evaluation and auto-rollback</li>
-            <li><strong>Blue-green</strong> — atomic switchover via consensus (~5ms routing change, plus drain for in-flight requests)</li>
-            <li><strong>A/B testing</strong> — deterministic traffic split by request context with per-variant metrics</li>
+            <li><strong>Canary</strong> — progressive traffic shift through configurable stages with auto-evaluation and auto-rollback</li>
+            <li><strong>Blue-green</strong> — atomic switchover via consensus (~5ms routing change)</li>
+            <li><strong>A/B testing</strong> — deterministic traffic split by request context</li>
           </ul>
-          <p>Deploy during business hours. If health degrades — instant rollback with one command.</p>
+          <p>Deploy during business hours. Health degrades? Instant rollback.</p>
         </div>
       </div>
     </div>
@@ -184,18 +187,18 @@ instances = 5</code></pre>
       <div class="two-col">
         <div>
           <h3>Three Dimensions</h3>
-          <p><strong>Slice scaling</strong> — spin up more instances of a specific slice on existing nodes. Classes are already loaded; scaling takes milliseconds.</p>
-          <p><strong>Node scaling</strong> — add more machines to the cluster. The node connects, restores state, and begins accepting work.</p>
-          <p><strong>Worker group scaling</strong> — add worker groups that scale independently via SWIM gossip. Core stays at 5-9 nodes for consensus; workers scale to thousands with zero consensus overhead.</p>
+          <p><strong>Slice scaling</strong> — more instances on existing nodes. Classes already loaded; scaling takes milliseconds.</p>
+          <p><strong>Node scaling</strong> — add machines. Node connects, restores state, begins serving.</p>
+          <p><strong>Worker group scaling</strong> — thousands of nodes via SWIM gossip. Zero consensus overhead.</p>
         </div>
         <div>
-          <h3>Three Tiers of Intelligence</h3>
+          <h3>Predictive Intelligence</h3>
           <ul class="features-list">
-            <li><strong>Tier 1 — Decision Tree</strong> (1-second intervals). Reactive scaling based on CPU, latency, queue depth, and error rate. Deterministic, fast, always reliable.</li>
-            <li><strong>Tier 2 — TTM Predictor</strong> (60-second intervals). ONNX-based ML model analyzing a 2-hour sliding window with 11-metric feature vector. Variance-based confidence scoring. Forecasts load and adjusts thresholds preemptively. Scale <em>before</em> the spike, not after.</li>
-            <li><strong>Tier 3 — LLM-based</strong> (planned). Long-term capacity planning, seasonal patterns, anomaly investigation.</li>
+            <li><strong>Tier 1 — Decision Tree</strong> (1-second). Reactive: CPU, latency, queue depth, error rate.</li>
+            <li><strong>Tier 2 — TTM Predictor</strong> (60-second). ONNX ML model, 2-hour sliding window, 11-metric feature vector. Scale <em>before</em> the spike.</li>
+            <li><strong>Tier 3 — LLM-based</strong> (planned). Long-term capacity planning.</li>
           </ul>
-          <p>If TTM fails, the Decision Tree continues with default thresholds. No scaling disruption.</p>
+          <p>If TTM fails, Decision Tree continues. No scaling disruption.</p>
         </div>
       </div>
     </div>
@@ -204,24 +207,22 @@ instances = 5</code></pre>
   <section class="alt">
     <div class="container">
       <div class="section-header">
-        <h2>For Every Project</h2>
-        <p>Slices are services — right-sized, without the infrastructure tax. Your existing service boundaries, API contracts, and domain decomposition apply directly. Legacy and greenfield coexist in the same cluster.</p>
+        <h2>Legacy and Greenfield</h2>
       </div>
       <div class="two-col">
         <div>
           <h3>Legacy Migration</h3>
-          <p>Your legacy system doesn't need a rewrite. Pick a boundary, extract an interface, annotate with <code>@Slice</code>, wrap the implementation:</p>
+          <p>Pick a boundary, extract an interface, annotate with <code>@Slice</code>, wrap the implementation:</p>
           <div class="code-block">
             <pre><code>Promise.lift(() -&gt; legacyService.generate(request));</code></pre>
           </div>
-          <p>One line to enter the Aether world. Start in Ember — single JVM, same process as your existing application. No worse than what you have today. From there, the strangler fig pattern: extract a hot path, deploy as a slice, route traffic, repeat.</p>
-          <p>One sprint to first slice in production.</p>
+          <p>Start in Ember — single JVM alongside your existing application. Strangler fig from there: extract a hot path, deploy as a slice, route traffic, repeat.</p>
         </div>
         <div>
           <h3>Greenfield</h3>
-          <p>Each slice can be as lean as a single method — and that's the recommended approach. No operational tradeoffs for small slices because Aether handles all infrastructure overhead.</p>
-          <p>One slice serving 50 instances during peak load while another idles at minimum. That granularity would be operationally insane with traditional microservices. With Aether, it's the default.</p>
-          <p><a href="jbct.html">JBCT patterns</a> — Leaf, Sequencer, Fork-Join — compose naturally within slices. Each slice method is a data transformation pipeline: parse input, gather data, process, respond.</p>
+          <p>Each slice can be a single method. No operational tradeoffs for small slices — Aether handles all infrastructure.</p>
+          <p>One slice at 50 instances during peak while another idles at minimum. That granularity is the default, not a special configuration.</p>
+          <p><a href="jbct.html">JBCT patterns</a> compose naturally within slices. Each method is a data transformation pipeline.</p>
         </div>
       </div>
     </div>
@@ -230,52 +231,32 @@ instances = 5</code></pre>
   <section>
     <div class="container">
       <div class="section-header">
-        <h2>From Laptop to Production</h2>
-        <p>Three environments, zero code changes.</p>
+        <h2>Tooling and Observability</h2>
       </div>
-      <div class="cards">
-        <div class="card">
-          <div class="card-icon">E</div>
-          <h3>Ember</h3>
-          <p>Embeddable cluster runtime with fluent builder API. Multiple logical nodes in the same JVM. Fast startup, standard debugger. Deploy slices alongside your existing application — the zero-risk entry point for legacy migration.</p>
+      <div class="two-col">
+        <div>
+          <h3>CLI and API</h3>
+          <ul class="features-list">
+            <li><strong>aether</strong> — 60+ CLI commands, batch and REPL modes</li>
+            <li><strong>aether-forge</strong> — local simulator with visual dashboard</li>
+            <li><strong>Management API</strong> — 60+ REST endpoints, WebSocket streams</li>
+            <li><strong>Passive Load Balancer</strong> — cluster-aware, smart routing, automatic failover</li>
+          </ul>
         </div>
-        <div class="card">
-          <div class="card-icon">F</div>
-          <h3>Forge</h3>
-          <p>5-node cluster simulator on your laptop with built-in passive load balancer. Real consensus, real routing, real failure scenarios. Web dashboard with live metrics. Chaos injection — kill nodes, crash leaders, trigger rolling restarts.</p>
-        </div>
-        <div class="card">
-          <div class="card-icon">A</div>
-          <h3>Aether</h3>
-          <p>Production cluster. Same slices, same code, different scale. Your code doesn't know which environment it's running in. Moving from Ember to Aether is a configuration change, not a code change.</p>
+        <div>
+          <h3>Built-in Observability</h3>
+          <ul class="features-list">
+            <li>Prometheus metrics (Micrometer)</li>
+            <li>Per-method P50/P95/P99 tracking</li>
+            <li>Dynamic tracing — toggle per method at runtime, no restart</li>
+            <li>Dynamic log levels per logger at runtime</li>
+            <li>Cluster event aggregator — 11 event types, WebSocket feed</li>
+          </ul>
         </div>
       </div>
       <div class="screenshot-embed mt-2">
-        <img src="image/topology-dashboard.png" alt="Aether Topology Dashboard — live data-flow graph showing endpoints, slices, resources, and pub-sub topics">
+        <img src="image/topology-dashboard.png" alt="Aether Topology Dashboard">
         <p class="text-center" style="font-size: 0.875rem; margin-top: 0.75rem;">Topology Dashboard — compile-time data-flow graph with swim-lane layout, pub-sub routing, and search filtering.</p>
-      </div>
-      <div class="two-col mt-2">
-        <div>
-          <h3>Tooling</h3>
-          <ul class="features-list">
-            <li><strong>aether</strong> — 60+ CLI commands across 14 command groups, single-command and REPL modes</li>
-            <li><strong>aether-node</strong> — run cluster nodes</li>
-            <li><strong>aether-forge</strong> — local simulator with visual dashboard</li>
-            <li><strong>Passive Load Balancer</strong> — cluster-aware, smart routing via binary protocol, automatic failover on node departure. Built into Ember and Forge</li>
-            <li><strong>Management API</strong> — 60+ REST endpoints across 13 route classes</li>
-          </ul>
-        </div>
-        <div>
-          <h3>Observability</h3>
-          <ul class="features-list">
-            <li>Prometheus-compatible metrics export (Micrometer)</li>
-            <li>Per-method invocation tracking (P50/P95/P99) with slow invocation detection</li>
-            <li>Dynamic aspects — toggle METRICS, TRACING, LOGGING per method at runtime without restart or redeployment</li>
-            <li>Sampling-based distributed tracing with adaptive per-node sampling</li>
-            <li>Cluster event aggregator — 11 event types with REST API and WebSocket real-time feed</li>
-            <li>Dynamic log levels per logger at runtime — no restart required</li>
-          </ul>
-        </div>
       </div>
     </div>
   </section>
@@ -284,54 +265,49 @@ instances = 5</code></pre>
     <div class="container">
       <div class="section-header">
         <h2>Proven in Practice</h2>
-        <p>Not a concept paper. Automated tests against real clusters.</p>
       </div>
       <div class="stats">
         <div>
           <div class="stat-value">8K req/s</div>
           <div class="stat-label">Sustained throughput</div>
-          <div class="stat-note">Real PostgreSQL, mixed read/write</div>
         </div>
         <div>
           <div class="stat-value">&lt;5ms</div>
-          <div class="stat-label">p95 latency at 8K req/s</div>
-          <div class="stat-note">With real database operations</div>
+          <div class="stat-label">p95 latency</div>
         </div>
         <div>
           <div class="stat-value">0.00%</div>
-          <div class="stat-label">Error rate</div>
-          <div class="stat-note">Across 5.9M requests</div>
+          <div class="stat-label">Error rate (5.9M req)</div>
         </div>
         <div>
           <div class="stat-value">3,000+</div>
-          <div class="stat-label">Total tests</div>
-          <div class="stat-note">Unit + integration + 100+ Docker/Forge scenarios</div>
+          <div class="stat-label">Tests</div>
         </div>
       </div>
-      <p class="text-center" style="font-size: 0.875rem;">Docker cluster on laptop (i7-11800H, 32GB RAM), real PostgreSQL, mixed read/write workload, database/cluster/load generator co-located. Scales to 15K req/s with sub-50ms p95. Tests cover cluster formation, leader election, node failures, network partitions, rolling updates, and chaos scenarios.</p>
+      <p class="text-center" style="font-size: 0.875rem;">Docker cluster on laptop (i7-11800H, 32GB), real PostgreSQL, mixed read/write. Scales to 15K req/s with sub-50ms p95.</p>
     </div>
   </section>
 
   <section>
     <div class="container">
-      <div class="section-header">
-        <h2>Licensing</h2>
-      </div>
       <div class="two-col">
         <div>
-          <h3>Business Source License 1.1</h3>
-          <p>Aether uses BSL 1.1, transitioning to Apache 2.0 after 4 years. This means:</p>
+          <h2>Licensing</h2>
+          <p>Business Source License 1.1, transitioning to Apache 2.0 after 4 years.</p>
           <ul class="features-list">
-            <li><strong>Free for internal use</strong> — Use Aether in your organization at no cost</li>
-            <li><strong>Free for non-production</strong> — Evaluate, develop, test freely</li>
-            <li><strong>Commercial license</strong> — Required only for offering Aether as a service</li>
-            <li><strong>Eventually open source</strong> — Full Apache 2.0 after 4 years</li>
+            <li><strong>Free for internal use</strong> — no cost</li>
+            <li><strong>Free for non-production</strong> — evaluate, develop, test</li>
+            <li><strong>Commercial license</strong> — only for offering Aether as a service</li>
           </ul>
         </div>
         <div>
-          <h3>Why BSL?</h3>
-          <p>BSL protects our ability to sustain development while keeping Aether accessible. Large cloud providers can't wrap and sell it, but you can use it freely for your applications.</p>
-          <p>It's the same model used by MariaDB, CockroachDB, and other successful projects.</p>
+          <h2>Pilot Program</h2>
+          <p>Direct team access, priority support, roadmap influence, favorable terms.</p>
+          <p>Ideal: Java backend with scaling challenges, microservices pain, production target.</p>
+          <div class="mt-2">
+            <a href="https://cal.eu/sergiy.yevtushenko/30min" target="_blank" class="btn btn-primary">Book a Call</a>
+            <a href="contact.html" class="btn btn-outline" style="margin-left: 0.5rem;">Contact Us</a>
+          </div>
         </div>
       </div>
     </div>
@@ -340,56 +316,23 @@ instances = 5</code></pre>
   <section class="alt">
     <div class="container">
       <div class="section-header">
-        <h2>Pilot Program</h2>
-        <p>We're looking for pilot partners to deploy Aether in production.</p>
-      </div>
-      <div class="two-col">
-        <div>
-          <h3>What You Get</h3>
-          <ul class="features-list">
-            <li>Direct access to the development team</li>
-            <li>Priority support during pilot</li>
-            <li>Influence on roadmap</li>
-            <li>Favorable commercial terms</li>
-          </ul>
-        </div>
-        <div>
-          <h3>Ideal Pilots</h3>
-          <ul class="features-list">
-            <li>Java backend with scaling challenges</li>
-            <li>Microservices complexity pain</li>
-            <li>Team willing to try new approaches</li>
-            <li>Production deployment target</li>
-          </ul>
-        </div>
-      </div>
-      <div class="text-center mt-2">
-        <a href="https://cal.eu/sergiy.yevtushenko/30min" target="_blank" class="btn btn-primary">Book a Call</a>
-        <a href="contact.html" class="btn btn-outline" style="margin-left: 0.5rem;">Contact Us</a>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="container">
-      <div class="section-header">
         <h2>Resources</h2>
       </div>
       <div class="cards">
-        <div class="card">
-          <h3>Monorepo</h3>
-          <p>Source code for Aether, Pragmatica Core, JBCT tools, and integrations.</p>
-          <a href="https://github.com/pragmaticalabs/pragmatica" target="_blank" class="btn btn-outline mt-2">pragmaticalabs/pragmatica</a>
-        </div>
         <div class="card">
           <h3>Documentation</h3>
           <p>Getting started, developer guide, feature catalog, operator guide.</p>
           <a href="docs/index.html" class="btn btn-outline mt-2">View Docs</a>
         </div>
         <div class="card">
+          <h3>Source Code</h3>
+          <p>Aether, Pragmatica Core, JBCT tools, and integrations.</p>
+          <a href="https://github.com/pragmaticalabs/pragmatica" target="_blank" class="btn btn-outline mt-2">GitHub</a>
+        </div>
+        <div class="card">
           <h3>Questions?</h3>
-          <p>Let's discuss if Aether is right for your use case.</p>
-          <a href="contact.html" class="btn btn-outline mt-2">Contact Us</a>
+          <p>Discuss if Aether is right for your use case.</p>
+          <a href="https://cal.eu/sergiy.yevtushenko/30min" target="_blank" class="btn btn-outline mt-2">Book a Call</a>
         </div>
       </div>
     </div>
