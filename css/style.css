@@ -171,11 +171,14 @@ nav {
 .btn-primary {
   background: var(--amber);
   color: var(--navy-dark);
+  box-shadow: 0 2px 8px rgba(245,158,11,0.25);
 }
 
 .btn-primary:hover {
   background: var(--amber-light);
   color: var(--navy-dark);
+  box-shadow: 0 4px 16px rgba(245,158,11,0.35);
+  transform: translateY(-1px);
 }
 
 .btn-secondary {
@@ -353,6 +356,7 @@ section.alt {
   border-radius: 8px;
   padding: 1.5rem;
   overflow-x: auto;
+  border: 1px solid rgba(20,40,70,0.2);
 }
 
 .code-block pre {
