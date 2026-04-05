@@ -53,8 +53,8 @@ public interface OrderService {
     static OrderService orderService(InventoryService inventory,
                                      PricingEngine pricing) {
         return request -&gt; inventory.check(request.items())
-                .flatMap(available -&gt; pricing.calculate(available))
-                .map(priced -&gt; OrderResult.placed(priced));
+                .flatMap(pricing::calculate)
+                .map(OrderResult::placed);
     }
 }</code></pre>
           </div>
@@ -66,7 +66,7 @@ public interface OrderService {
           <div class="stats mt-2">
             <div>
               <div class="stat-value">8K req/s</div>
-              <div class="stat-label">Real PostgreSQL</div>
+              <div class="stat-label">Sustained throughput</div>
             </div>
             <div>
               <div class="stat-value">&lt;5ms</div>
@@ -74,9 +74,10 @@ public interface OrderService {
             </div>
             <div>
               <div class="stat-value">0.00%</div>
-              <div class="stat-label">Error rate</div>
+              <div class="stat-label">Error rate (5.9M req)</div>
             </div>
           </div>
+          <p style="font-size: 0.8125rem; color: var(--gray-600); margin-top: 0.5rem;">Docker cluster, real PostgreSQL, mixed read/write workload, laptop (i7-11800H, 32GB).</p>
         </div>
       </div>
     </div>
@@ -185,6 +186,10 @@ public interface OrderService {
       <div class="video-embed">
         <iframe width="640" height="360" allowfullscreen src="https://www.awesomescreenshot.com/embed?id=50013933&shareKey=f16cf0ff602db9c4b7ff4928ecb382a7"></iframe>
       </div>
+      <div class="screenshot-embed mt-2">
+        <img src="image/topology-dashboard.png" alt="Aether Topology Dashboard — live data-flow graph showing endpoints, slices, resources, and pub-sub topics">
+        <p class="text-center" style="font-size: 0.875rem; margin-top: 0.75rem;">Topology Dashboard — compile-time data-flow graph with swim-lane layout, pub-sub routing, and search filtering.</p>
+      </div>
     </div>
   </section>
 
@@ -194,13 +199,13 @@ public interface OrderService {
         <div>
           <h2>Built on 35 Years of Experience</h2>
           <p>From firmware to distributed systems, trading platforms to blockchain nodes. Aether is distilled from decades of solving real problems in production.</p>
-          <p>320K lines of Java. 500+ tests. 28 E2E scenarios against real clusters. 6.5-hour soak test. Four cloud providers without vendor SDKs.</p>
-          <p><a href="jbct.html">JBCT</a> — the coding methodology behind Aether — ensures every slice follows deterministic, AI-friendly patterns.</p>
+          <p>500K+ lines of Java. 3,000+ tests. 100+ integration test scenarios against Docker clusters and Forge. Multi-hour soak tests. Four cloud providers without vendor SDKs.</p>
+          <p><a href="jbct.html">JBCT</a> (Java Backend Coding Technology) — the methodology behind Aether — ensures every slice follows deterministic, testable patterns optimized for human-AI collaboration.</p>
         </div>
         <div>
           <h2>Start Small, Prove Value</h2>
           <p>You don't have to go all-in. Start with Aether Ember in a single JVM alongside your existing application. Extract one hot path, deploy as a slice, route traffic.</p>
-          <p>One sprint to first slice in production.</p>
+          <p>First slice running in Forge in under an hour.</p>
           <div class="mt-2">
             <a href="docs/getting-started.html" class="btn btn-primary">Get Started</a>
             <a href="https://cal.eu/sergiy.yevtushenko/30min" target="_blank" class="btn btn-outline" style="margin-left: 0.5rem;">Book a Call</a>
