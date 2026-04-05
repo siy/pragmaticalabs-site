@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Getting Started | Aether Documentation | Pragmatica Labs</title>
+  <meta name="description" content="Build and deploy your first Aether slice in 5 minutes. Prerequisites, project scaffolding, code walkthrough, and Forge deployment.">
+  <meta property="og:title" content="Getting Started with Aether">
+  <meta property="og:description" content="Build and deploy your first Aether slice in 5 minutes.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pragmaticalabs.io/docs/getting-started.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+  <header>
+    <nav class="container">
+      <a href="../index.html" class="logo">
+        <img src="../image/logo_reverse.png" alt="Pragmatica Labs">
+      </a>
+      <ul class="nav-links">
+        <li><a href="../aether.html">Aether</a></li>
+        <li><a href="index.html" class="active">Docs</a></li>
+        <li><a href="../jbct.html">JBCT</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="docs-nav">
+    <div class="container">
+      <a href="getting-started.html" class="active">Getting Started</a>
+      <a href="developer-guide.html">Developer Guide</a>
+      <a href="feature-catalog.html">Feature Catalog</a>
+      <a href="operator-guide.html">Operator Guide</a>
+      <a href="reference.html">Reference</a>
+    </div>
+  </div>
+
+  <section>
+    <div class="container docs-content">
+      <div class="docs-breadcrumb">
+        <a href="index.html">Docs</a><span>/</span>Getting Started
+      </div>
+
+      <h1>My First Aether Slice</h1>
+      <p>Build, test, and deploy your first slice from scratch.</p>
+
+      <h2 id="prerequisites">Prerequisites</h2>
+
+      <table class="docs-table">
+        <thead>
+          <tr><th>Tool</th><th>Version</th><th>Check</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Java</td><td>25+</td><td><code>java --version</code></td></tr>
+          <tr><td>Maven</td><td>3.8+</td><td><code>mvn --version</code></td></tr>
+          <tr><td>JBCT CLI</td><td>0.20.0+</td><td><code>jbct --version</code></td></tr>
+        </tbody>
+      </table>
+
+      <p>All JBCT and Aether artifacts are published to Maven Central. The generated POM references them automatically — no additional repository configuration needed.</p>
+
+      <h2 id="create-project">Step 1: Create Your Slice Project</h2>
+
+      <div class="code-block">
+        <pre><code>jbct init my-first-slice --slice
+cd my-first-slice</code></pre>
+      </div>
+
+      <p>This generates a complete Aether slice project. You can customize coordinates:</p>
+
+      <div class="code-block">
+        <pre><code>jbct init my-first-slice -g org.mycompany -a my-first-slice --slice</code></pre>
+      </div>
+
+      <p>Generated directory tree:</p>
+
+      <div class="code-block">
+        <pre><code>my-first-slice/
+├── pom.xml                    # Maven build (Java 25, JBCT plugin)
+├── jbct.toml                  # JBCT formatter/linter config
+├── forge.toml                 # Forge cluster configuration
+├── aether.toml                # Runtime resource configuration
+├── run-forge.sh               # Start local Forge server
+├── start-postgres.sh          # Start PostgreSQL container
+├── deploy-forge.sh            # Deploy to local Forge
+├── schema/
+│   └── init.sql               # Database initialization
+└── src/
+    ├── main/java/.../
+    │   └── helloworld/
+    │       └── HelloWorld.java # Sample slice
+    └── test/java/.../
+        └── helloworld/
+            └── HelloWorldTest.java</code></pre>
+      </div>
+
+      <p>Notice: there's only <strong>one Java source file</strong>. In Aether, the slice interface, request/response types, error types, factory method, and implementation all live together in one file. This is deliberate — related code stays together.</p>
+
+      <h2 id="build">Step 2: Build and Test</h2>
+
+      <div class="code-block">
+        <pre><code>mvn clean verify</code></pre>
+      </div>
+
+      <p>This runs the full pipeline:</p>
+
+      <ol class="features-list" style="list-style: decimal; padding-left: 2rem;">
+        <li><strong>Compile</strong> — with the slice annotation processor</li>
+        <li><strong>Annotation processing</strong> — generates factory class, deployment manifest, HTTP route bindings</li>
+        <li><strong>Test</strong> — runs unit tests</li>
+        <li><strong>JBCT check</strong> — formatting and linting rules</li>
+        <li><strong>Slice packaging</strong> — API and implementation JARs</li>
+        <li><strong>Blueprint generation</strong> — <code>target/blueprint.toml</code></li>
+        <li><strong>Slice verification</strong> — manifest well-formedness, dependency scope validation</li>
+      </ol>
+
+      <h2 id="understand-code">Step 3: Understand the Generated Code</h2>
+
+      <div class="code-block">
+        <pre><code>@Slice
+public interface MyFirstSlice {
+
+    record Request(String value) {
+        public static Result&lt;Request&gt; request(String value) {
+            return Verify.ensure(value, Verify.Is::present, ValidationError.emptyValue())
+                         .map(Request::new);
+        }
+    }
+
+    record Response(String result) {}
+
+    sealed interface ValidationError extends Cause {
+        record EmptyValue() implements ValidationError {
+            @Override
+            public String message() {
+                return "Value cannot be empty";
+            }
+        }
+
+        static ValidationError emptyValue() {
+            return new EmptyValue();
+        }
+    }
+
+    Promise&lt;Response&gt; process(Request request);
+
+    static MyFirstSlice myFirstSlice() {
+        return request -&gt; Promise.success(new Response("Processed: " + request.value()));
+    }
+}</code></pre>
+      </div>
+
+      <p>Key elements:</p>
+      <ul class="features-list">
+        <li><code>@Slice</code> — marks this interface for annotation processing</li>
+        <li><strong>Request/Response records</strong> — typed, validated, immutable</li>
+        <li><strong>Sealed error interface</strong> — exhaustive error handling, no exceptions</li>
+        <li><strong>Factory method</strong> — <code>myFirstSlice()</code> creates the implementation. Dependencies would be parameters here</li>
+        <li><strong>Promise return type</strong> — all slice methods return <code>Promise&lt;T&gt;</code> for non-blocking execution</li>
+      </ul>
+
+      <h2 id="run-forge">Step 4: Run Forge</h2>
+
+      <div class="code-block">
+        <pre><code># Start a local 5-node cluster simulator
+./run-forge.sh</code></pre>
+      </div>
+
+      <p>Forge starts a full cluster on your laptop — real consensus, real routing, real failure scenarios. Open the dashboard at <code>http://localhost:8080</code> for live metrics and cluster visualization.</p>
+
+      <h2 id="deploy">Step 5: Deploy</h2>
+
+      <div class="code-block">
+        <pre><code># In another terminal
+./deploy-forge.sh</code></pre>
+      </div>
+
+      <p>This uploads the slice artifact to the Forge cluster and deploys it. You should see the slice activate across nodes in the dashboard.</p>
+
+      <p>Test it:</p>
+
+      <div class="code-block">
+        <pre><code>curl -X POST http://localhost:8080/my-first-slice/process \
+  -H "Content-Type: application/json" \
+  -d '{"value": "hello"}'</code></pre>
+      </div>
+
+      <h2 id="next-steps">Next Steps</h2>
+
+      <div class="docs-cards">
+        <a href="developer-guide.html" class="docs-card">
+          <h3>Developer Guide</h3>
+          <p>Resource provisioning, database access, HTTP clients, pub-sub.</p>
+        </a>
+        <a href="developer-guide.html#resource-provisioning" class="docs-card">
+          <h3>Resource Provisioning</h3>
+          <p>How Aether separates application assembly from infrastructure.</p>
+        </a>
+        <a href="feature-catalog.html" class="docs-card">
+          <h3>Feature Catalog</h3>
+          <p>172 capabilities with implementation status.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <a href="../index.html" class="logo logo-footer">
+            <img src="../image/logo_reverse.png" alt="Pragmatica Labs">
+          </a>
+          <p>Pragmatic solutions for Java teams.</p>
+        </div>
+        <div>
+          <h4>Aether</h4>
+          <ul class="footer-links">
+            <li><a href="../aether.html">Overview</a></li>
+            <li><a href="index.html">Documentation</a></li>
+            <li><a href="getting-started.html">Getting Started</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul class="footer-links">
+            <li><a href="../contact.html">Contact</a></li>
+            <li><a href="https://github.com/pragmaticalabs" target="_blank">GitHub</a></li>
+            <li><a href="https://www.linkedin.com/in/sergiy-yevtushenko-6977a12" target="_blank">LinkedIn</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Pragmatica Labs. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

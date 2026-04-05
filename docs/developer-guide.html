@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer Guide | Aether Documentation | Pragmatica Labs</title>
+  <meta name="description" content="Aether developer guide — resource provisioning, database access, HTTP clients, pub-sub, scheduled tasks. Build distributed Java services with typed interfaces.">
+  <meta property="og:title" content="Aether Developer Guide — Resource Provisioning">
+  <meta property="og:description" content="How Aether separates application assembly from resource provisioning. Typed interfaces, compile-time wiring, zero framework dependencies.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pragmaticalabs.io/docs/developer-guide.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+  <header>
+    <nav class="container">
+      <a href="../index.html" class="logo">
+        <img src="../image/logo_reverse.png" alt="Pragmatica Labs">
+      </a>
+      <ul class="nav-links">
+        <li><a href="../aether.html">Aether</a></li>
+        <li><a href="index.html" class="active">Docs</a></li>
+        <li><a href="../jbct.html">JBCT</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="docs-nav">
+    <div class="container">
+      <a href="getting-started.html">Getting Started</a>
+      <a href="developer-guide.html" class="active">Developer Guide</a>
+      <a href="feature-catalog.html">Feature Catalog</a>
+      <a href="operator-guide.html">Operator Guide</a>
+      <a href="reference.html">Reference</a>
+    </div>
+  </div>
+
+  <section>
+    <div class="container docs-content">
+      <div class="docs-breadcrumb">
+        <a href="index.html">Docs</a><span>/</span>Developer Guide
+      </div>
+
+      <h1>Aether Developer Guide</h1>
+      <p>Build distributed services with typed interfaces and declarative resources.</p>
+
+      <h2 id="slices">Slices Are Services</h2>
+
+      <p>A <strong>slice</strong> is a service — a typed Java interface with a factory method for dependencies, deployed and managed by the Aether runtime. If you've written a Spring <code>@Service</code>, you already know the programming model.</p>
+
+      <table class="docs-table">
+        <thead>
+          <tr><th>You know this...</th><th>Slice equivalent</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>@Service</code> class</td><td><code>@Slice</code> interface</td></tr>
+          <tr><td><code>@Autowired</code> / constructor injection</td><td>Factory method parameters</td></tr>
+          <tr><td>Service method call</td><td><code>Promise&lt;T&gt;</code> method call (local or remote, transparent)</td></tr>
+          <tr><td><code>@RestController</code></td><td><code>routes.toml</code> (declarative HTTP routing)</td></tr>
+          <tr><td>Kubernetes Deployment YAML</td><td>Blueprint TOML</td></tr>
+          <tr><td>HPA (Horizontal Pod Autoscaler)</td><td>Built-in reactive + predictive scaling</td></tr>
+        </tbody>
+      </table>
+
+      <p>There is no message passing, no mailbox, no behavior switching, no supervision tree. Your existing service-based designs, API contracts, domain decomposition, and interaction patterns transfer directly.</p>
+
+      <div class="code-block">
+        <pre><code>@Slice
+public interface OrderService {
+    Promise&lt;OrderResult&gt; placeOrder(PlaceOrderRequest request);
+
+    static OrderService orderService(InventoryService inventory) {
+        record orderService(InventoryService inventory) implements OrderService {
+            @Override
+            public Promise&lt;OrderResult&gt; placeOrder(PlaceOrderRequest request) {
+                return inventory.reserve(new ReserveRequest(request.items()))
+                                .map(reserved -&gt; new OrderResult(reserved.orderId()));
+            }
+        }
+        return new orderService(inventory);
+    }
+}</code></pre>
+      </div>
+
+      <h2 id="resource-provisioning">Resource Provisioning Model</h2>
+
+      <p>Aether separates two concerns that traditional frameworks conflate through dependency injection:</p>
+
+      <p><strong>Application assembly</strong> — wiring internal components together — is fully automated. If a use case depends on a repository, and both are part of the application, the wiring is deterministic. The annotation processor resolves it at compile time. No configuration needed.</p>
+
+      <p><strong>Resource provisioning</strong> — providing access to external infrastructure — is handled by the runtime. The application declares <em>what</em> it needs through annotated factory method parameters. The runtime decides <em>how</em> to provide it based on the deployment environment.</p>
+
+      <p>The annotation processor classifies factory parameters automatically:</p>
+
+      <table class="docs-table">
+        <thead>
+          <tr><th>Parameter Pattern</th><th>Classification</th><th>What Happens</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>@Sql SqlConnector db</code></td><td>Resource dependency</td><td>Provisioned from <code>aether.toml</code></td></tr>
+          <tr><td><code>InventoryService inventory</code></td><td>Slice dependency</td><td>Proxy generated for remote calls</td></tr>
+          <tr><td><code>OrderValidator validator</code></td><td>Plain interface</td><td>Factory method called directly</td></tr>
+        </tbody>
+      </table>
+
+      <p>This separation has immediate consequences:</p>
+
+      <ul class="features-list">
+        <li><code>pom.xml</code> contains only business dependencies. Infrastructure dependencies belong to the runtime.</li>
+        <li>Same artifact deploys to any environment without configuration changes.</li>
+        <li>Credentials never touch the application. The runtime handles authentication with the infrastructure.</li>
+        <li>A security patch in a database driver is a runtime update — zero application rebuilds, zero redeployments.</li>
+        <li>Tests focus on business logic. No mock infrastructure, no test containers for resources the application doesn't own.</li>
+      </ul>
+
+      <h3 id="built-in-qualifiers">Built-In Qualifiers</h3>
+
+      <p>Aether ships four built-in resource qualifiers:</p>
+
+      <table class="docs-table">
+        <thead>
+          <tr><th>Annotation</th><th>Resource Type</th><th>Config Section</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>@PgSql</code></td><td><code>PgSqlConnector</code></td><td><code>"database"</code></td></tr>
+          <tr><td><code>@Sql</code></td><td><code>SqlConnector</code></td><td><code>"database"</code></td></tr>
+          <tr><td><code>@Http</code></td><td><code>HttpClient</code></td><td><code>"http"</code></td></tr>
+          <tr><td><code>@Notify</code></td><td><code>NotificationSender</code></td><td><code>"notification"</code></td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="custom-qualifiers">Custom Qualifiers</h3>
+
+      <p>When you need multiple databases or want descriptive naming, create custom qualifier annotations:</p>
+
+      <div class="code-block">
+        <pre><code>@ResourceQualifier(type = SqlConnector.class, config = "database.orders")
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.PARAMETER)
+@interface OrderDb {}
+
+@ResourceQualifier(type = SqlConnector.class, config = "database.analytics")
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.PARAMETER)
+@interface AnalyticsDb {}</code></pre>
+      </div>
+
+      <p>Use them on factory parameters:</p>
+
+      <div class="code-block">
+        <pre><code>@Slice
+public interface OrderAnalytics {
+
+    Promise&lt;Report&gt; generateReport(ReportRequest request);
+
+    static OrderAnalytics orderAnalytics(@OrderDb SqlConnector orders,
+                                         @AnalyticsDb SqlConnector analytics) {
+        record orderAnalytics(SqlConnector orders,
+                              SqlConnector analytics) implements OrderAnalytics {
+            @Override
+            public Promise&lt;Report&gt; generateReport(ReportRequest request) {
+                return Promise.all(
+                    orders.query("SELECT count(*) FROM orders WHERE period = ?",
+                                 request.period()),
+                    analytics.query("SELECT sum(revenue) FROM sales WHERE period = ?",
+                                    request.period())
+                ).map(Report::new);
+            }
+        }
+        return new orderAnalytics(orders, analytics);
+    }
+}</code></pre>
+      </div>
+
+      <p>Each qualifier maps to a separate configuration section in <code>aether.toml</code>:</p>
+
+      <div class="code-block">
+        <pre><code>[database.orders]
+jdbc_url = "jdbc:postgresql://localhost:5432/orders"
+username = "app"
+password = "${secrets:database/orders/password}"
+
+[database.analytics]
+jdbc_url = "jdbc:postgresql://localhost:5432/analytics"
+username = "app"
+password = "${secrets:database/analytics/password}"</code></pre>
+      </div>
+
+      <p>Notice: the application never sees passwords. Secret references (<code>${secrets:...}</code>) are resolved by the runtime before resource provisioning.</p>
+
+      <h2 id="database-access">Database Access</h2>
+
+      <h3>Aether Store (<code>@PgSql</code>)</h3>
+
+      <p>Type-safe persistence with compile-time SQL validation. Define an interface, annotate with <code>@PgSql</code>, and the annotation processor validates queries against your schema at build time.</p>
+
+      <div class="code-block">
+        <pre><code>@PgSql
+public interface OrderPersistence {
+    Promise&lt;Option&lt;OrderRow&gt;&gt; findById(long id);
+    Promise&lt;List&lt;OrderRow&gt;&gt; findByStatus(String status);
+    Promise&lt;OrderRow&gt; save(OrderRow order);
+}</code></pre>
+      </div>
+
+      <p>The processor generates implementations that use the native async PostgreSQL driver with built-in pipelining — multiple queries in flight per connection without round-trip serialization. No external connection pooler needed.</p>
+
+      <h3>Generic SQL (<code>@Sql</code>)</h3>
+
+      <div class="code-block">
+        <pre><code>@Slice
+public interface UserRepository {
+    Promise&lt;User&gt; findUser(FindRequest request);
+
+    static UserRepository userRepository(@Sql SqlConnector db) {
+        return request -&gt; db.query(
+            "SELECT id, name, email FROM users WHERE id = ?",
+            request.userId()
+        ).map(UserRepository::toUser);
+    }
+}</code></pre>
+      </div>
+
+      <h3>Schema Migrations</h3>
+
+      <p>Database migrations are bundled in the blueprint artifact and executed atomically with deployment. The cluster coordinates migration execution via consensus — no external migration tool, no separate migration step.</p>
+
+      <p>Migration types: versioned (V), repeatable (R), undo (U), and baseline (B). Failure recovery with automatic retry and exponential backoff.</p>
+
+      <h2 id="http-clients">HTTP Clients</h2>
+
+      <div class="code-block">
+        <pre><code>@Slice
+public interface PaymentGateway {
+    Promise&lt;PaymentResult&gt; charge(ChargeRequest request);
+
+    static PaymentGateway paymentGateway(@Http HttpClient http) {
+        return request -&gt; http.post("/charges", request)
+                              .map(PaymentResult::fromResponse);
+    }
+}</code></pre>
+      </div>
+
+      <p>Configuration in <code>aether.toml</code>:</p>
+
+      <div class="code-block">
+        <pre><code>[http.payment-gateway]
+base_url = "https://api.payments.example.com/v1"
+connect_timeout = "5s"
+request_timeout = "15s"
+
+[http.payment-gateway.default_headers]
+Authorization = "Bearer ${secrets:payment/api-key}"</code></pre>
+      </div>
+
+      <p>Error handling uses sealed interfaces — <code>SerializationFailed</code>, <code>DeserializationFailed</code>, <code>RequestFailed</code>, <code>RequestFailedWithBody</code> — composable through <code>Result</code>/<code>Promise</code> chains.</p>
+
+      <h2 id="pub-sub">Pub-Sub Messaging</h2>
+
+      <div class="code-block">
+        <pre><code>// Publisher
+@Slice
+public interface OrderEvents {
+    // Publisher interface — Aether generates the implementation
+}
+
+// Subscriber
+@Slice
+public interface InventoryUpdater {
+    @Subscription
+    Promise&lt;Unit&gt; onOrderPlaced(OrderPlacedEvent event);
+
+    static InventoryUpdater inventoryUpdater(@Sql SqlConnector db) {
+        return event -&gt; db.execute(
+            "UPDATE inventory SET reserved = reserved + ? WHERE item_id = ?",
+            event.quantity(), event.itemId()
+        ).mapToUnit();
+    }
+}</code></pre>
+      </div>
+
+      <p>Topic subscription is managed via the consensus KV-Store. Competing consumers use round-robin distribution. Message delivery survives leader failover — proven through E2E tests with node kills.</p>
+
+      <h2 id="scheduled-tasks">Scheduled Tasks</h2>
+
+      <div class="code-block">
+        <pre><code>@Slice
+public interface DailyReport {
+    @Scheduled(cron = "0 6 * * *")
+    Promise&lt;Unit&gt; generateReport();
+
+    @Scheduled(interval = "5m", mode = ExecutionMode.SINGLE)
+    Promise&lt;Unit&gt; checkAlerts();
+}</code></pre>
+      </div>
+
+      <p>Two execution modes: <code>SINGLE</code> (one node executes, leader-selected) and <code>ALL</code> (every node with the slice runs independently). Cron expressions support 5-field syntax. Pause, resume, and manual trigger via CLI and REST API.</p>
+
+      <h2 id="config-provisioning">Application Configuration</h2>
+
+      <p>Slices can declare typed configuration dependencies. The annotation processor generates type-safe parsers at compile time.</p>
+
+      <div class="code-block">
+        <pre><code>// Define config record
+public record GatewayConfig(String provider, String apiUrl, int timeoutMs) {
+    public static Result&lt;GatewayConfig&gt; gatewayConfig(String provider,
+                                                       String apiUrl,
+                                                       int timeoutMs) {
+        return Result.success(new GatewayConfig(provider, apiUrl, timeoutMs));
+    }
+}
+
+// Create qualifier
+@ResourceQualifier(type = ConfigurationSection.class, config = "payment.gateway")
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.PARAMETER, ElementType.METHOD})
+public @interface PaymentGateway {}
+
+// Use in slice
+@Slice
+public interface PaymentService {
+    static PaymentService paymentService(
+            @PaymentGateway GatewayConfig config,
+            @PgSql PaymentPersistence persistence) { ... }
+
+    // Optional: receive config updates at runtime
+    @PaymentGateway
+    Result&lt;Unit&gt; onConfigUpdate(GatewayConfig newConfig);
+}</code></pre>
+      </div>
+
+      <p>Configuration merges from three sources:</p>
+
+      <table class="docs-table">
+        <thead>
+          <tr><th>Priority</th><th>Source</th><th>When</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1 (highest)</td><td>KV-Store</td><td>Pushed via API, survives restarts</td></tr>
+          <tr><td>2</td><td><code>aether.toml [app.*]</code></td><td>Set per deployment</td></tr>
+          <tr><td>3 (lowest)</td><td><code>META-INF/config.toml</code></td><td>Developer defaults in slice JAR</td></tr>
+        </tbody>
+      </table>
+
+      <p>Supported types: <code>String</code>, <code>int</code>, <code>long</code>, <code>boolean</code>, <code>double</code>, <code>Option&lt;String&gt;</code>, <code>List&lt;String&gt;</code>, core value objects (<code>TimeSpan</code>, <code>Email</code>, <code>Url</code>, <code>Uuid</code>), and any user-defined type with a JBCT-standard factory method.</p>
+
+      <h2 id="interceptors">Interceptors</h2>
+
+      <p>Method-level cross-cutting concerns — retry, circuit breaker, rate limiting, logging, metrics — are declared in TOML configuration, not in code:</p>
+
+      <div class="code-block">
+        <pre><code>[interceptors.retry]
+max_attempts = 3
+backoff = "exponential"
+initial_delay = "100ms"
+
+[interceptors.circuit-breaker]
+failure_threshold = 5
+reset_timeout = "30s"
+
+[interceptors.rate-limit]
+permits_per_second = 100</code></pre>
+      </div>
+
+      <p>Runtime enable/disable per method via CLI and REST API. No code changes, no redeployment.</p>
+
+      <h2 id="next-steps">Next Steps</h2>
+
+      <div class="docs-cards">
+        <a href="getting-started.html" class="docs-card">
+          <h3>Getting Started</h3>
+          <p>Build and deploy your first slice in 5 minutes.</p>
+        </a>
+        <a href="feature-catalog.html" class="docs-card">
+          <h3>Feature Catalog</h3>
+          <p>172 capabilities with implementation status.</p>
+        </a>
+        <a href="operator-guide.html" class="docs-card">
+          <h3>Operator Guide</h3>
+          <p>Deploy, scale, and monitor Aether clusters.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <a href="../index.html" class="logo logo-footer">
+            <img src="../image/logo_reverse.png" alt="Pragmatica Labs">
+          </a>
+          <p>Pragmatic solutions for Java teams.</p>
+        </div>
+        <div>
+          <h4>Aether</h4>
+          <ul class="footer-links">
+            <li><a href="../aether.html">Overview</a></li>
+            <li><a href="index.html">Documentation</a></li>
+            <li><a href="getting-started.html">Getting Started</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul class="footer-links">
+            <li><a href="../contact.html">Contact</a></li>
+            <li><a href="https://github.com/pragmaticalabs" target="_blank">GitHub</a></li>
+            <li><a href="https://www.linkedin.com/in/sergiy-yevtushenko-6977a12" target="_blank">LinkedIn</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Pragmatica Labs. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

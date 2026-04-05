@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reference | Aether Documentation | Pragmatica Labs</title>
+  <meta name="description" content="Aether reference — CLI commands, management API, configuration, slice API.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+  <header>
+    <nav class="container">
+      <a href="../index.html" class="logo">
+        <img src="../image/logo_reverse.png" alt="Pragmatica Labs">
+      </a>
+      <ul class="nav-links">
+        <li><a href="../aether.html">Aether</a></li>
+        <li><a href="index.html" class="active">Docs</a></li>
+        <li><a href="../jbct.html">JBCT</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="docs-nav">
+    <div class="container">
+      <a href="getting-started.html">Getting Started</a>
+      <a href="developer-guide.html">Developer Guide</a>
+      <a href="feature-catalog.html">Feature Catalog</a>
+      <a href="operator-guide.html">Operator Guide</a>
+      <a href="reference.html" class="active">Reference</a>
+    </div>
+  </div>
+
+  <section>
+    <div class="container docs-content">
+      <div class="docs-breadcrumb">
+        <a href="index.html">Docs</a><span>/</span>Reference
+      </div>
+
+      <h1>Reference</h1>
+      <p>CLI commands, management API, configuration, and slice API.</p>
+
+      <h2 id="cli">CLI Tools</h2>
+
+      <table class="docs-table">
+        <thead><tr><th>Tool</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>aether</code></td><td>Cluster management CLI — 60+ commands, batch and REPL modes</td></tr>
+          <tr><td><code>aether-node</code></td><td>Run a cluster node</td></tr>
+          <tr><td><code>aether-forge</code></td><td>Local cluster simulator with visual dashboard</td></tr>
+          <tr><td><code>jbct</code></td><td>Code validation, formatting, project scaffolding</td></tr>
+        </tbody>
+      </table>
+
+      <h3>CLI Command Groups</h3>
+
+      <table class="docs-table">
+        <thead><tr><th>Group</th><th>Commands</th></tr></thead>
+        <tbody>
+          <tr><td><code>status</code></td><td>Cluster status, leader, node count, health</td></tr>
+          <tr><td><code>nodes</code></td><td>List nodes, roles, states</td></tr>
+          <tr><td><code>slices</code></td><td>Cluster-wide and per-node slice listing</td></tr>
+          <tr><td><code>routes</code></td><td>HTTP routes, cluster-wide and per-node</td></tr>
+          <tr><td><code>metrics</code></td><td>System metrics, historical queries (5m/15m/1h/2h)</td></tr>
+          <tr><td><code>health</code></td><td>Cluster health score, component status</td></tr>
+          <tr><td><code>scale</code></td><td>Manual scaling, instance count adjustment</td></tr>
+          <tr><td><code>deploy</code></td><td>Blueprint deployment with strategy selection</td></tr>
+          <tr><td><code>artifact</code></td><td>Upload, list, inspect artifacts</td></tr>
+          <tr><td><code>blueprint</code></td><td>List, inspect, delete blueprints</td></tr>
+          <tr><td><code>config</code></td><td>View and update runtime configuration</td></tr>
+          <tr><td><code>logging</code></td><td>Dynamic log level management</td></tr>
+          <tr><td><code>events</code></td><td>Cluster event history and streaming</td></tr>
+          <tr><td><code>node</code></td><td>Drain, activate, shutdown individual nodes</td></tr>
+          <tr><td><code>cluster</code></td><td>Bootstrap, scale, upgrade cluster</td></tr>
+          <tr><td><code>observability</code></td><td>Enable/disable tracing and metrics per method</td></tr>
+          <tr><td><code>alerts</code></td><td>Active and historical alerts</td></tr>
+          <tr><td><code>thresholds</code></td><td>Warning/critical threshold configuration</td></tr>
+          <tr><td><code>backup</code></td><td>Create, list, restore cluster backups</td></tr>
+          <tr><td><code>schema</code></td><td>Migration status, manual retry</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Authentication</h3>
+
+      <div class="code-block">
+        <pre><code># Via flag
+aether --api-key mykey123 status
+
+# Via environment
+export AETHER_API_KEY=mykey123
+aether status</code></pre>
+      </div>
+
+      <h2 id="management-api">Management API</h2>
+
+      <p>60+ REST endpoints across 13 route classes. All endpoints accept JSON and return JSON.</p>
+
+      <table class="docs-table">
+        <thead><tr><th>Endpoint</th><th>Method</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>/api/status</code></td><td>GET</td><td>Cluster status</td></tr>
+          <tr><td><code>/api/health</code></td><td>GET</td><td>Health check (liveness/readiness)</td></tr>
+          <tr><td><code>/api/nodes</code></td><td>GET</td><td>List cluster nodes</td></tr>
+          <tr><td><code>/api/slices</code></td><td>GET</td><td>List deployed slices</td></tr>
+          <tr><td><code>/api/routes</code></td><td>GET</td><td>List HTTP routes</td></tr>
+          <tr><td><code>/api/scale</code></td><td>POST</td><td>Manual scaling</td></tr>
+          <tr><td><code>/api/deploy</code></td><td>POST</td><td>Deploy blueprint</td></tr>
+          <tr><td><code>/api/blueprint/publish</code></td><td>POST</td><td>Publish blueprint artifact</td></tr>
+          <tr><td><code>/api/metrics</code></td><td>GET</td><td>System and invocation metrics</td></tr>
+          <tr><td><code>/api/events</code></td><td>GET</td><td>Cluster events</td></tr>
+          <tr><td><code>/api/config</code></td><td>GET/PUT</td><td>Runtime configuration</td></tr>
+          <tr><td><code>/api/topology</code></td><td>GET</td><td>Compile-time data-flow graph</td></tr>
+          <tr><td><code>/metrics</code></td><td>GET</td><td>Prometheus scrape endpoint</td></tr>
+        </tbody>
+      </table>
+
+      <h3>WebSocket Endpoints</h3>
+
+      <table class="docs-table">
+        <thead><tr><th>Endpoint</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>/ws/dashboard</code></td><td>Live metrics stream</td></tr>
+          <tr><td><code>/ws/status</code></td><td>Cluster state changes</td></tr>
+          <tr><td><code>/ws/events</code></td><td>Real-time cluster events with delta broadcasting</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="slice-api">Slice API</h2>
+
+      <h3>Core Annotations</h3>
+
+      <table class="docs-table">
+        <thead><tr><th>Annotation</th><th>Target</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>@Slice</code></td><td>Interface</td><td>Marks a service interface for annotation processing</td></tr>
+          <tr><td><code>@Subscription</code></td><td>Method</td><td>Subscribes to a pub-sub topic</td></tr>
+          <tr><td><code>@Scheduled</code></td><td>Method</td><td>Periodic or cron-based execution</td></tr>
+          <tr><td><code>@Codec</code></td><td>Record/Enum</td><td>Generates serialization codec</td></tr>
+          <tr><td><code>@ResourceQualifier</code></td><td>Annotation</td><td>Defines custom resource qualifier</td></tr>
+          <tr><td><code>@PgSql</code></td><td>Parameter/Interface</td><td>PostgreSQL persistence (Aether Store)</td></tr>
+          <tr><td><code>@Sql</code></td><td>Parameter</td><td>Generic SQL connector</td></tr>
+          <tr><td><code>@Http</code></td><td>Parameter</td><td>HTTP client</td></tr>
+          <tr><td><code>@Notify</code></td><td>Parameter</td><td>PostgreSQL LISTEN/NOTIFY</td></tr>
+          <tr><td><code>@ConfigurationSection</code></td><td>Type</td><td>Typed application configuration</td></tr>
+          <tr><td><code>@ContentStoreQualifier</code></td><td>Parameter</td><td>Content store access</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Core Types</h3>
+
+      <table class="docs-table">
+        <thead><tr><th>Type</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>Promise&lt;T&gt;</code></td><td>Asynchronous computation result. All slice methods return this</td></tr>
+          <tr><td><code>Result&lt;T&gt;</code></td><td>Success or failure. Used for validation, parsing, error handling</td></tr>
+          <tr><td><code>Option&lt;T&gt;</code></td><td>Present or absent value. Replaces null</td></tr>
+          <tr><td><code>Cause</code></td><td>Sealed error interface. Replaces exceptions</td></tr>
+          <tr><td><code>Unit</code></td><td>Void replacement for <code>Promise&lt;Unit&gt;</code></td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="configuration">Configuration</h2>
+
+      <p>Aether is configured via <code>aether.toml</code>. Key sections:</p>
+
+      <table class="docs-table">
+        <thead><tr><th>Section</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>[cluster]</code></td><td>Cluster name, peer addresses, ports</td></tr>
+          <tr><td><code>[server]</code></td><td>HTTP server port, worker threads</td></tr>
+          <tr><td><code>[app-http]</code></td><td>Application HTTP server, API keys, RBAC</td></tr>
+          <tr><td><code>[database.*]</code></td><td>Database connections</td></tr>
+          <tr><td><code>[http.*]</code></td><td>HTTP client configurations</td></tr>
+          <tr><td><code>[cloud]</code></td><td>Cloud provider settings</td></tr>
+          <tr><td><code>[timeouts.*]</code></td><td>13 subsystem-specific timeout groups</td></tr>
+          <tr><td><code>[storage]</code></td><td>AHSE tier configuration (memory/disk/S3)</td></tr>
+          <tr><td><code>[app.*]</code></td><td>Application configuration (merged with slice defaults)</td></tr>
+          <tr><td><code>[endpoints.*]</code></td><td>Infrastructure endpoint definitions</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Environment Variables</h3>
+
+      <p>Variables with <code>AETHER_</code> prefix are imported automatically. Converted from <code>SCREAMING_SNAKE_CASE</code> to <code>dot.notation.lowercase</code>:</p>
+
+      <table class="docs-table">
+        <thead><tr><th>Environment Variable</th><th>Config Key</th></tr></thead>
+        <tbody>
+          <tr><td><code>AETHER_DATABASE_HOST</code></td><td><code>database.host</code></td></tr>
+          <tr><td><code>AETHER_SERVER_PORT</code></td><td><code>server.port</code></td></tr>
+          <tr><td><code>AETHER_CLUSTER_SECRET</code></td><td><code>cluster.secret</code></td></tr>
+        </tbody>
+      </table>
+
+      <p class="mt-2">For complete configuration reference including all timeout groups, see <a href="https://github.com/pragmaticalabs/pragmatica/blob/release-1.0.0-rc1/aether/docs/reference/configuration.md" target="_blank">configuration.md</a> and <a href="https://github.com/pragmaticalabs/pragmatica/blob/release-1.0.0-rc1/aether/docs/reference/timeout-configuration.md" target="_blank">timeout-configuration.md</a> in the repository.</p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <a href="../index.html" class="logo logo-footer">
+            <img src="../image/logo_reverse.png" alt="Pragmatica Labs">
+          </a>
+          <p>Pragmatic solutions for Java teams.</p>
+        </div>
+        <div>
+          <h4>Aether</h4>
+          <ul class="footer-links">
+            <li><a href="../aether.html">Overview</a></li>
+            <li><a href="index.html">Documentation</a></li>
+            <li><a href="getting-started.html">Getting Started</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul class="footer-links">
+            <li><a href="../contact.html">Contact</a></li>
+            <li><a href="https://github.com/pragmaticalabs" target="_blank">GitHub</a></li>
+            <li><a href="https://www.linkedin.com/in/sergiy-yevtushenko-6977a12" target="_blank">LinkedIn</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Pragmatica Labs. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
