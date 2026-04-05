@@ -165,10 +165,10 @@ public interface OrderAnalytics {
             @Override
             public Promise&lt;Report&gt; generateReport(ReportRequest request) {
                 return Promise.all(
-                    orders.query("SELECT count(*) FROM orders WHERE period = ?",
-                                 request.period()),
-                    analytics.query("SELECT sum(revenue) FROM sales WHERE period = ?",
-                                    request.period())
+                    orders.queryOne("SELECT count(*) FROM orders WHERE period = ?",
+                                    COUNT_MAPPER, request.period()),
+                    analytics.queryOne("SELECT sum(revenue) FROM sales WHERE period = ?",
+                                       SUM_MAPPER, request.period())
                 ).map(Report::new);
             }
         }
@@ -215,13 +215,13 @@ public interface OrderPersistence {
       <div class="code-block">
         <pre><code>@Slice
 public interface UserRepository {
-    Promise&lt;User&gt; findUser(FindRequest request);
+    Promise&lt;Option&lt;User&gt;&gt; findUser(FindRequest request);
 
     static UserRepository userRepository(@Sql SqlConnector db) {
-        return request -&gt; db.query(
+        return request -&gt; db.queryOptional(
             "SELECT id, name, email FROM users WHERE id = ?",
-            request.userId()
-        ).map(UserRepository::toUser);
+            USER_MAPPER,
+            request.userId());
     }
 }</code></pre>
       </div>
@@ -235,68 +235,114 @@ public interface UserRepository {
       <h2 id="http-clients">HTTP Clients</h2>
 
       <div class="code-block">
-        <pre><code>@Slice
+        <pre><code>// Custom qualifier for a specific HTTP endpoint
+@ResourceQualifier(type = HttpClient.class, config = "http.payment")
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.PARAMETER)
+@interface PaymentHttp {}
+
+@Slice
 public interface PaymentGateway {
     Promise&lt;PaymentResult&gt; charge(ChargeRequest request);
 
-    static PaymentGateway paymentGateway(@Http HttpClient http) {
-        return request -&gt; http.post("/charges", request)
-                              .map(PaymentResult::fromResponse);
+    static PaymentGateway paymentGateway(@PaymentHttp HttpClient http) {
+        return request -&gt; http.post("/charges", JsonMapper.serialize(request))
+                              .map(result -&gt; result.body())
+                              .map(PaymentResult::fromJson);
     }
 }</code></pre>
       </div>
 
-      <p>Configuration in <code>aether.toml</code>:</p>
+      <p>The built-in <code>@Http</code> qualifier maps to the <code>"http"</code> config section. For multiple HTTP clients, create custom qualifiers as shown above. Configuration in <code>aether.toml</code>:</p>
 
       <div class="code-block">
-        <pre><code>[http.payment-gateway]
+        <pre><code>[http.payment]
 base_url = "https://api.payments.example.com/v1"
 connect_timeout = "5s"
-request_timeout = "15s"
-
-[http.payment-gateway.default_headers]
-Authorization = "Bearer ${secrets:payment/api-key}"</code></pre>
+request_timeout = "15s"</code></pre>
       </div>
 
-      <p>Error handling uses sealed interfaces — <code>SerializationFailed</code>, <code>DeserializationFailed</code>, <code>RequestFailed</code>, <code>RequestFailedWithBody</code> — composable through <code>Result</code>/<code>Promise</code> chains.</p>
+      <p><code>HttpClient</code> methods accept string bodies and return <code>Promise&lt;HttpResult&lt;String&gt;&gt;</code>: <code>get(path)</code>, <code>post(path, body)</code>, <code>put(path, body)</code>, <code>delete(path)</code>, <code>patch(path, body)</code>. All methods accept an optional <code>Map&lt;String, String&gt; headers</code> parameter.</p>
 
       <h2 id="pub-sub">Pub-Sub Messaging</h2>
 
+      <p>Pub-Sub uses the same <code>@ResourceQualifier</code> pattern as other resources. Define custom annotations for each topic — one for publishing (targets PARAMETER) and one for subscribing (targets METHOD):</p>
+
       <div class="code-block">
-        <pre><code>// Publisher
+        <pre><code>// Topic qualifiers
+@ResourceQualifier(type = Publisher.class, config = "messaging.order-events")
+@Retention(RUNTIME) @Target(PARAMETER)
+public @interface OrderEvents {}
+
+@ResourceQualifier(type = Subscriber.class, config = "messaging.order-events")
+@Retention(RUNTIME) @Target(METHOD)
+public @interface OnOrderEvent {}
+
+// Publisher slice
 @Slice
-public interface OrderEvents {
-    // Publisher interface — Aether generates the implementation
+public interface OrderService {
+    Promise&lt;OrderResult&gt; placeOrder(PlaceOrderRequest request);
+
+    static OrderService orderService(@OrderEvents Publisher&lt;OrderPlacedEvent&gt; events,
+                                     @PgSql OrderPersistence persistence) {
+        return request -&gt; persistence.save(request)
+                             .onSuccess(order -&gt; events.publish(
+                                 new OrderPlacedEvent(order.id())));
+    }
 }
 
-// Subscriber
+// Subscriber slice
 @Slice
 public interface InventoryUpdater {
-    @Subscription
+    @OnOrderEvent
     Promise&lt;Unit&gt; onOrderPlaced(OrderPlacedEvent event);
 
     static InventoryUpdater inventoryUpdater(@Sql SqlConnector db) {
-        return event -&gt; db.execute(
+        return event -&gt; db.update(
             "UPDATE inventory SET reserved = reserved + ? WHERE item_id = ?",
-            event.quantity(), event.itemId()
-        ).mapToUnit();
+            event.quantity(), event.itemId())
+            .map(_ -&gt; Unit.unit());
     }
 }</code></pre>
       </div>
 
-      <p>Topic subscription is managed via the consensus KV-Store. Competing consumers use round-robin distribution. Message delivery survives leader failover — proven through E2E tests with node kills.</p>
+      <p>Topic subscription is managed via the consensus KV-Store. Competing consumers use round-robin distribution. Message delivery survives leader failover — proven through integration tests with node kills.</p>
 
       <h2 id="scheduled-tasks">Scheduled Tasks</h2>
 
+      <p>Scheduled tasks use custom <code>@ResourceQualifier</code> annotations targeting METHOD. Schedule parameters are configured in TOML, not in annotations:</p>
+
       <div class="code-block">
-        <pre><code>@Slice
-public interface DailyReport {
-    @Scheduled(cron = "0 6 * * *")
+        <pre><code>// Qualifier annotations
+@ResourceQualifier(type = Scheduled.class, config = "scheduling.daily-report")
+@Retention(RUNTIME) @Target(METHOD)
+public @interface DailyReport {}
+
+@ResourceQualifier(type = Scheduled.class, config = "scheduling.alert-check")
+@Retention(RUNTIME) @Target(METHOD)
+public @interface AlertCheck {}
+
+// Slice
+@Slice
+public interface ReportService {
+    @DailyReport
     Promise&lt;Unit&gt; generateReport();
 
-    @Scheduled(interval = "5m", mode = ExecutionMode.SINGLE)
+    @AlertCheck
     Promise&lt;Unit&gt; checkAlerts();
 }</code></pre>
+      </div>
+
+      <p>Schedule configuration in TOML:</p>
+
+      <div class="code-block">
+        <pre><code>[scheduling.daily-report]
+cron = "0 6 * * *"
+mode = "SINGLE"
+
+[scheduling.alert-check]
+interval = "5m"
+mode = "SINGLE"</code></pre>
       </div>
 
       <p>Two execution modes: <code>SINGLE</code> (one node executes, leader-selected) and <code>ALL</code> (every node with the slice runs independently). Cron expressions support 5-field syntax. Pause, resume, and manual trigger via CLI and REST API.</p>
@@ -378,7 +424,7 @@ permits_per_second = 100</code></pre>
         </a>
         <a href="feature-catalog.html" class="docs-card">
           <h3>Feature Catalog</h3>
-          <p>172 capabilities with implementation status.</p>
+          <p>173 capabilities with implementation status.</p>
         </a>
         <a href="operator-guide.html" class="docs-card">
           <h3>Operator Guide</h3>
