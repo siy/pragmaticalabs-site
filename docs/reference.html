@@ -80,8 +80,19 @@
           <tr><td><code>observability</code></td><td>Enable/disable tracing and metrics per method</td></tr>
           <tr><td><code>alerts</code></td><td>Active and historical alerts</td></tr>
           <tr><td><code>thresholds</code></td><td>Warning/critical threshold configuration</td></tr>
-          <tr><td><code>backup</code></td><td>Create, list, restore cluster backups</td></tr>
+          <tr><td><code>backup</code></td><td>Trigger, list, restore cluster backups</td></tr>
           <tr><td><code>schema</code></td><td>Migration status, manual retry</td></tr>
+          <tr><td><code>node-slices</code></td><td>Per-node slice listing</td></tr>
+          <tr><td><code>node-routes</code></td><td>Per-node route listing</td></tr>
+          <tr><td><code>invocation-metrics</code></td><td>Per-method P50/P95/P99 latency</td></tr>
+          <tr><td><code>controller</code></td><td>Scaling controller configuration</td></tr>
+          <tr><td><code>scheduled-tasks</code></td><td>List, pause, resume, trigger scheduled tasks</td></tr>
+          <tr><td><code>topology</code></td><td>Compile-time data-flow graph</td></tr>
+          <tr><td><code>workers</code></td><td>Worker pool management and health</td></tr>
+          <tr><td><code>stream</code></td><td>Stream management, consumer groups, lag</td></tr>
+          <tr><td><code>storage</code></td><td>AHSE storage management</td></tr>
+          <tr><td><code>cert</code></td><td>Certificate operations</td></tr>
+          <tr><td><code>ab-test</code></td><td>A/B test management</td></tr>
         </tbody>
       </table>
 
@@ -98,7 +109,7 @@ aether status</code></pre>
 
       <h2 id="management-api">Management API</h2>
 
-      <p>60+ REST endpoints across 13 route classes. All endpoints accept JSON and return JSON.</p>
+      <p>60+ REST endpoints across 13 route classes. All endpoints accept JSON and return JSON. The table below shows key endpoints — see the full API in the <a href="https://github.com/pragmaticalabs/pragmatica/blob/release-1.0.0-rc1/aether/docs/reference/management-api.md" target="_blank">management API reference</a>.</p>
 
       <table class="docs-table">
         <thead><tr><th>Endpoint</th><th>Method</th><th>Description</th></tr></thead>
@@ -130,24 +141,53 @@ aether status</code></pre>
         </tbody>
       </table>
 
+      <h2 id="ports">Default Ports</h2>
+
+      <table class="docs-table">
+        <thead><tr><th>Port</th><th>Purpose</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>8070+</td><td>App HTTP (per node)</td><td>8070, 8071, 8072... Configurable</td></tr>
+          <tr><td>5150</td><td>Management API</td><td>Configurable</td></tr>
+          <tr><td>8888</td><td>Dashboard (Forge)</td><td>Configurable</td></tr>
+          <tr><td>8080</td><td>Passive Load Balancer</td><td>Configurable</td></tr>
+          <tr><td>4000+</td><td>Cluster transport (consensus, QUIC)</td><td>Configurable</td></tr>
+          <tr><td>4001+</td><td>SWIM failure detection</td><td>Auto-derived (cluster port + 1)</td></tr>
+        </tbody>
+      </table>
+
       <h2 id="slice-api">Slice API</h2>
 
-      <h3>Core Annotations</h3>
+      <h3>Built-In Annotations</h3>
 
       <table class="docs-table">
         <thead><tr><th>Annotation</th><th>Target</th><th>Purpose</th></tr></thead>
         <tbody>
-          <tr><td><code>@Slice</code></td><td>Interface</td><td>Marks a service interface for annotation processing</td></tr>
-          <tr><td><code>@Subscription</code></td><td>Method</td><td>Subscribes to a pub-sub topic</td></tr>
-          <tr><td><code>@Scheduled</code></td><td>Method</td><td>Periodic or cron-based execution</td></tr>
-          <tr><td><code>@Codec</code></td><td>Record/Enum</td><td>Generates serialization codec</td></tr>
-          <tr><td><code>@ResourceQualifier</code></td><td>Annotation</td><td>Defines custom resource qualifier</td></tr>
-          <tr><td><code>@PgSql</code></td><td>Parameter/Interface</td><td>PostgreSQL persistence (Aether Store)</td></tr>
-          <tr><td><code>@Sql</code></td><td>Parameter</td><td>Generic SQL connector</td></tr>
-          <tr><td><code>@Http</code></td><td>Parameter</td><td>HTTP client</td></tr>
-          <tr><td><code>@Notify</code></td><td>Parameter</td><td>PostgreSQL LISTEN/NOTIFY</td></tr>
-          <tr><td><code>@ConfigurationSection</code></td><td>Type</td><td>Typed application configuration</td></tr>
+          <tr><td><code>@Slice</code></td><td>Interface (TYPE)</td><td>Marks a service interface for annotation processing</td></tr>
+          <tr><td><code>@ResourceQualifier</code></td><td>Annotation (ANNOTATION_TYPE)</td><td>Meta-annotation for defining custom resource qualifiers</td></tr>
+          <tr><td><code>@PgSql</code></td><td>Parameter, Interface</td><td>PostgreSQL type-safe persistence (Aether Store)</td></tr>
+          <tr><td><code>@Sql</code></td><td>Parameter</td><td>Generic SQL connector (config: <code>"database"</code>)</td></tr>
+          <tr><td><code>@Http</code></td><td>Parameter</td><td>HTTP client (config: <code>"http"</code>)</td></tr>
+          <tr><td><code>@Notify</code></td><td>Parameter</td><td>Notification sender (config: <code>"notification"</code>)</td></tr>
           <tr><td><code>@ContentStoreQualifier</code></td><td>Parameter</td><td>Content store access</td></tr>
+          <tr><td><code>@PartitionKey</code></td><td>Record component</td><td>Marks partition key field for stream routing</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Custom Qualifier Patterns</h3>
+
+      <p>These are defined per-project using <code>@ResourceQualifier</code>. The resource type and target determine the behavior:</p>
+
+      <table class="docs-table">
+        <thead><tr><th>Resource Type</th><th>Target</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>Subscriber.class</code></td><td>METHOD</td><td>Pub-sub topic subscription</td></tr>
+          <tr><td><code>Scheduled.class</code></td><td>METHOD</td><td>Scheduled task (cron/interval configured in TOML)</td></tr>
+          <tr><td><code>StreamPublisher.class</code></td><td>PARAMETER</td><td>Stream publishing</td></tr>
+          <tr><td><code>StreamSubscriber.class</code></td><td>METHOD</td><td>Stream push-based consumption</td></tr>
+          <tr><td><code>StreamAccess.class</code></td><td>PARAMETER</td><td>Stream pull-based access</td></tr>
+          <tr><td><code>PgNotificationSubscriber.class</code></td><td>METHOD</td><td>PostgreSQL LISTEN/NOTIFY</td></tr>
+          <tr><td><code>ConfigurationSection.class</code></td><td>PARAMETER, METHOD</td><td>Typed config injection + runtime update notification</td></tr>
+          <tr><td><code>MethodInterceptor.class</code></td><td>METHOD</td><td>Method-level interceptors (retry, circuit breaker)</td></tr>
         </tbody>
       </table>
 
