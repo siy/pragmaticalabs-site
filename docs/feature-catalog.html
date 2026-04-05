@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Feature Catalog | Aether Documentation | Pragmatica Labs</title>
-  <meta name="description" content="Aether feature catalog — 172 capabilities across 14 categories with implementation status. Deployment, scaling, consensus, networking, storage, observability, cloud integration.">
+  <meta name="description" content="Aether feature catalog — 173 capabilities across 14 categories with implementation status. Deployment, scaling, consensus, networking, storage, observability, cloud integration.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -43,10 +43,10 @@
       </div>
 
       <h1>Aether Feature Catalog</h1>
-      <p>172 capabilities across 14 categories.</p>
+      <p>173 capabilities across 14 categories.</p>
 
       <p>
-        <span class="badge badge-battle-tested">Battle-tested</span> Proven through multi-node E2E tests with failure injection
+        <span class="badge badge-battle-tested">Integration-verified</span> Proven through multi-node integration tests with failure injection (node kills, partitions, leader failovers)
         <span class="badge badge-complete">Complete</span> Production-ready, tested
         <span class="badge badge-partial">Partial</span> Core implemented, gaps noted
         <span class="badge badge-planned">Planned</span> Designed but not yet implemented
@@ -57,10 +57,10 @@
       <table class="docs-table">
         <thead><tr><th>Feature</th><th>Status</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td>Blueprint management</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>Declarative TOML-based deployment specs with dependency ordering, validation, and status tracking</td></tr>
-          <tr><td>Slice lifecycle</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>Full state machine: DOWNLOADING, LOADING, STARTING, ACTIVE, UNLOADING, FAILED. Per-node KV-Store tracking</td></tr>
-          <tr><td>Deployment strategies</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>Immediate, canary (progressive traffic shift), blue-green (atomic switchover), rolling (weighted traffic), A/B testing</td></tr>
-          <tr><td>Auto-healing</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>Bidirectional convergence with metadata-aware scheduling: spot-first, host-spread, zone-balanced provisioning</td></tr>
+          <tr><td>Blueprint management</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>Declarative TOML-based deployment specs with dependency ordering, validation, and status tracking</td></tr>
+          <tr><td>Slice lifecycle</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>Full state machine: DOWNLOADING, LOADING, STARTING, ACTIVE, UNLOADING, FAILED. Per-node KV-Store tracking</td></tr>
+          <tr><td>Deployment strategies</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>Immediate, canary (progressive traffic shift), blue-green (atomic switchover), rolling (weighted traffic), A/B testing</td></tr>
+          <tr><td>Auto-healing</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>Bidirectional convergence with metadata-aware scheduling: spot-first, host-spread, zone-balanced provisioning</td></tr>
           <tr><td>ClassLoader isolation</td><td><span class="badge badge-complete">Complete</span></td><td>Per-slice classloader prevents dependency conflicts between slices</td></tr>
           <tr><td>Schema migration engine</td><td><span class="badge badge-complete">Complete</span></td><td>V/R/U/B migration types, consensus-coordinated, deployment-gated, auto-retry with backoff</td></tr>
           <tr><td>Multi-blueprint lifecycle</td><td><span class="badge badge-complete">Complete</span></td><td>Blueprint-scoped artifact ownership, exclusivity enforcement, owner-filtered deletion</td></tr>
@@ -72,7 +72,7 @@
       <table class="docs-table">
         <thead><tr><th>Feature</th><th>Status</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td>CPU-based auto-scaling</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>DecisionTreeController: CPU thresholds, 1-second evaluation intervals</td></tr>
+          <tr><td>CPU-based auto-scaling</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>DecisionTreeController: CPU thresholds, 1-second evaluation intervals</td></tr>
           <tr><td>minInstances enforcement</td><td><span class="badge badge-complete">Complete</span></td><td>Hard floor across auto-scaler, manual API, and rolling updates</td></tr>
           <tr><td>Manual scale API</td><td><span class="badge badge-complete">Complete</span></td><td><code>POST /api/scale</code> with blueprint membership guard</td></tr>
           <tr><td>TTM predictive scaling</td><td><span class="badge badge-partial">Partial</span></td><td>ONNX model inference, 11-metric feature vector, 2-hour window. Not connected to live training</td></tr>
@@ -84,11 +84,11 @@
       <table class="docs-table">
         <thead><tr><th>Feature</th><th>Status</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td>Rabia consensus</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>Leaderless crash-fault tolerant consensus. Formal spec verification suite</td></tr>
-          <tr><td>Leader election</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>Zero-message deterministic election with instant re-election on departure</td></tr>
-          <tr><td>Quorum state management</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>Monotonic-sequenced notifications, graceful degradation, automatic restoration</td></tr>
-          <tr><td>Topology management</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>Node discovery, health tracking, grace period for departures</td></tr>
-          <tr><td>Distributed KV-Store</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>Consensus-replicated with 12+ typed key categories</td></tr>
+          <tr><td>Rabia consensus</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>Leaderless crash-fault tolerant consensus. Formal spec verification suite</td></tr>
+          <tr><td>Leader election</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>Zero-message deterministic election with instant re-election on departure</td></tr>
+          <tr><td>Quorum state management</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>Monotonic-sequenced notifications, graceful degradation, automatic restoration</td></tr>
+          <tr><td>Topology management</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>Node discovery, health tracking, grace period for departures</td></tr>
+          <tr><td>Distributed KV-Store</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>Consensus-replicated with 12+ typed key categories</td></tr>
         </tbody>
       </table>
 
@@ -96,8 +96,8 @@
       <table class="docs-table">
         <thead><tr><th>Feature</th><th>Status</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td>Service-to-service invocation</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>SliceInvoker with HTTP routing, load balancer, timeout/retry, metrics</td></tr>
-          <tr><td>Version routing</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>Traffic splitting between versions during deployments</td></tr>
+          <tr><td>Service-to-service invocation</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>SliceInvoker with HTTP routing, load balancer, timeout/retry, metrics</td></tr>
+          <tr><td>Version routing</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>Traffic splitting between versions during deployments</td></tr>
           <tr><td>Passive load balancer</td><td><span class="badge badge-complete">Complete</span></td><td>Cluster-aware LB node with smart routing, automatic failover</td></tr>
           <tr><td>QUIC transport</td><td><span class="badge badge-complete">Complete</span></td><td>QUIC-based cluster transport. Stream-per-message-type multiplexing, mandatory TLS 1.3</td></tr>
           <tr><td>HTTP/3 server</td><td><span class="badge badge-complete">Complete</span></td><td>HTTP/3 (QUIC-based) alongside HTTP/1.1 and HTTP/2</td></tr>
@@ -108,7 +108,7 @@
       <table class="docs-table">
         <thead><tr><th>Feature</th><th>Status</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td>Pub-sub delivery</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>Cross-node fan-out, competing consumers, leader failover proven</td></tr>
+          <tr><td>Pub-sub delivery</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>Cross-node fan-out, competing consumers, leader failover proven</td></tr>
           <tr><td>In-memory streaming</td><td><span class="badge badge-complete">Complete</span></td><td>OffHeapRingBuffer, partitioning, consumer groups, cursor checkpointing, dead-letter</td></tr>
           <tr><td>Streaming governor failover</td><td><span class="badge badge-complete">Complete</span></td><td>WatermarkTracker, GovernorFailoverHandler with AHSE catch-up</td></tr>
           <tr><td>Cross-tier stream reads</td><td><span class="badge badge-complete">Complete</span></td><td>TieredStreamReader with segment prefetch from AHSE</td></tr>
@@ -116,12 +116,36 @@
         </tbody>
       </table>
 
+      <h2 id="scheduled">Scheduled Invocation</h2>
+      <table class="docs-table">
+        <thead><tr><th>Feature</th><th>Status</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>Scheduled task registry</td><td><span class="badge badge-complete">Complete</span></td><td>KV-Store backed registry with change listener pattern and pause/resume support</td></tr>
+          <tr><td>Scheduled task manager</td><td><span class="badge badge-complete">Complete</span></td><td>SINGLE (leader-only) and ALL (every node) execution modes. Interval and cron scheduling</td></tr>
+          <tr><td>Cron expression parser</td><td><span class="badge badge-complete">Complete</span></td><td>5-field cron syntax with ranges, steps, lists</td></tr>
+          <tr><td>Management API</td><td><span class="badge badge-complete">Complete</span></td><td>List, filter, pause, resume, manual trigger, execution state query. CLI support</td></tr>
+          <tr><td>Execution state tracking</td><td><span class="badge badge-complete">Complete</span></td><td>Last execution time, consecutive failures, total executions per task</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="security">Security &amp; Resilience</h2>
+      <table class="docs-table">
+        <thead><tr><th>Feature</th><th>Status</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>Inter-node mTLS</td><td><span class="badge badge-complete">Complete</span></td><td>Mutual TLS for all node-to-node TCP. HKDF-derived from cluster secret, no external PKI</td></tr>
+          <tr><td>SWIM gossip encryption</td><td><span class="badge badge-complete">Complete</span></td><td>AES-256-GCM encryption with zero-downtime key rotation</td></tr>
+          <tr><td>RBAC per-route security</td><td><span class="badge badge-complete">Complete</span></td><td>ADMIN/OPERATOR/VIEWER roles with per-endpoint enforcement. SHA-256 API keys</td></tr>
+          <tr><td>Operational audit trail</td><td><span class="badge badge-complete">Complete</span></td><td>7 event types with cluster-wide aggregation</td></tr>
+          <tr><td>TLS default for containers</td><td><span class="badge badge-complete">Complete</span></td><td>Automatic TLS enablement in containerized deployments</td></tr>
+        </tbody>
+      </table>
+
       <h2 id="storage">Storage &amp; Data</h2>
       <table class="docs-table">
         <thead><tr><th>Feature</th><th>Status</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td>Artifact repository</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>Maven-compatible, chunked storage, checksum verification</td></tr>
-          <tr><td>Distributed hash table</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>Consistent hash ring (150 vnodes, 1024 partitions), quorum R/W, anti-entropy repair</td></tr>
+          <tr><td>Artifact repository</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>Maven-compatible, chunked storage, checksum verification</td></tr>
+          <tr><td>Distributed hash table</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>Consistent hash ring (150 vnodes, 1024 partitions), quorum R/W, anti-entropy repair</td></tr>
           <tr><td>Hierarchical storage (AHSE)</td><td><span class="badge badge-complete">Complete</span></td><td>Content-addressed blocks, SHA-256, memory/disk/S3 tiers, per-consumer policies. 93 tests</td></tr>
           <tr><td>KV-Store durable backup</td><td><span class="badge badge-complete">Complete</span></td><td>TOML serialization to local git repo with versioning and optional remote push</td></tr>
           <tr><td>Hybrid logical clock</td><td><span class="badge badge-complete">Complete</span></td><td>48-bit microseconds + 16-bit counter. Foundation for causal ordering</td></tr>
@@ -132,9 +156,9 @@
       <table class="docs-table">
         <thead><tr><th>Feature</th><th>Status</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td>System metrics</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>CPU, heap, event loop lag. 120-minute aggregation window</td></tr>
-          <tr><td>Cluster metrics API</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>Aggregated load, deployment timeline, error rates, health score</td></tr>
-          <tr><td>Prometheus export</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>Micrometer integration with Prometheus scrape endpoint</td></tr>
+          <tr><td>System metrics</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>CPU, heap, event loop lag. 120-minute aggregation window</td></tr>
+          <tr><td>Cluster metrics API</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>Aggregated load, deployment timeline, error rates, health score</td></tr>
+          <tr><td>Prometheus export</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>Micrometer integration with Prometheus scrape endpoint</td></tr>
           <tr><td>Invocation metrics</td><td><span class="badge badge-complete">Complete</span></td><td>Per-method P50/P95/P99, slow invocation detection</td></tr>
           <tr><td>Unified observability</td><td><span class="badge badge-complete">Complete</span></td><td>Sampling-based tracing + adaptive per-node sampling + SLF4J bridge</td></tr>
           <tr><td>Cluster event aggregator</td><td><span class="badge badge-complete">Complete</span></td><td>Ring buffer (1000 events), 11 event types, REST API, WebSocket feed</td></tr>
@@ -174,11 +198,11 @@
       <table class="docs-table">
         <thead><tr><th>Feature</th><th>Status</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td>REST management API</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>60+ endpoints across 13 route classes</td></tr>
+          <tr><td>REST management API</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>60+ endpoints across 13 route classes</td></tr>
           <tr><td>Interactive CLI</td><td><span class="badge badge-complete">Complete</span></td><td>Batch and REPL modes. 60+ commands across 14 groups</td></tr>
           <tr><td>WebSocket streams</td><td><span class="badge badge-complete">Complete</span></td><td>Dashboard metrics, cluster state, real-time events with delta broadcasting</td></tr>
-          <tr><td>E2E test framework</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>Testcontainers-based, bridge networking, partition/disconnect/reconnect</td></tr>
-          <tr><td>Forge simulator</td><td><span class="badge badge-battle-tested">Battle-tested</span></td><td>Load generation, chaos injection, visual dashboard</td></tr>
+          <tr><td>E2E test framework</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>Testcontainers-based, bridge networking, partition/disconnect/reconnect</td></tr>
+          <tr><td>Forge simulator</td><td><span class="badge badge-battle-tested">Integration-verified</span></td><td>Load generation, chaos injection, visual dashboard</td></tr>
           <tr><td>Declarative cluster management</td><td><span class="badge badge-complete">Complete</span></td><td>TOML-based config, 12-step bootstrap orchestrator, CLI commands</td></tr>
         </tbody>
       </table>
@@ -191,7 +215,7 @@
           <tr><td>JBCT compliance</td><td><span class="badge badge-complete">Complete</span></td><td>Format linting, return type validation, pattern checking. Maven plugin</td></tr>
           <tr><td>Topology graph</td><td><span class="badge badge-complete">Complete</span></td><td>Compile-time topology extraction, swim-lane SVG, search filtering</td></tr>
           <tr><td><code>jbct add-slice</code></td><td><span class="badge badge-complete">Complete</span></td><td>Scaffolds slice into existing project with config, tests, routes</td></tr>
-          <tr><td>JBCT code formatter</td><td><span class="badge badge-complete">Complete</span></td><td>CST-based formatter. Records, enums, switch expressions, text blocks</td></tr>
+          <tr><td>JBCT code formatter</td><td><span class="badge badge-complete">Complete</span></td><td>Flow-based deterministic formatter. Records, enums, switch expressions, text blocks, chain alignment</td></tr>
           <tr><td>Property-based testing</td><td><span class="badge badge-complete">Complete</span></td><td>PropertyTest, Arbitrary, Shrinkable, RandomSource</td></tr>
         </tbody>
       </table>
