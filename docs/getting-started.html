@@ -87,16 +87,24 @@ cd my-first-slice</code></pre>
 ├── aether.toml                # Runtime resource configuration
 ├── run-forge.sh               # Start local Forge server
 ├── start-postgres.sh          # Start PostgreSQL container
+├── stop-postgres.sh           # Stop PostgreSQL container
 ├── deploy-forge.sh            # Deploy to local Forge
+├── deploy-test.sh             # Deploy to test environment
+├── deploy-prod.sh             # Deploy to production
+├── generate-blueprint.sh      # Generate deployment blueprint
 ├── schema/
 │   └── init.sql               # Database initialization
 └── src/
-    ├── main/java/.../
-    │   └── helloworld/
-    │       └── HelloWorld.java # Sample slice
+    ├── main/
+    │   ├── java/.../
+    │   │   └── myfirstslice/
+    │   │       └── MyFirstSlice.java  # Sample slice
+    │   └── resources/
+    │       └── slices/
+    │           └── MyFirstSlice.toml  # Slice runtime config
     └── test/java/.../
-        └── helloworld/
-            └── HelloWorldTest.java</code></pre>
+        └── myfirstslice/
+            └── MyFirstSliceTest.java</code></pre>
       </div>
 
       <p>Notice: there's only <strong>one Java source file</strong>. In Aether, the slice interface, request/response types, error types, factory method, and implementation all live together in one file. This is deliberate — related code stays together.</p>
@@ -127,7 +135,7 @@ public interface MyFirstSlice {
 
     record Request(String value) {
         public static Result&lt;Request&gt; request(String value) {
-            return Verify.ensure(value, Verify.Is::present, ValidationError.emptyValue())
+            return Verify.ensure(value, Verify.Is::notBlank, new ValidationError.EmptyValue())
                          .map(Request::new);
         }
     }
@@ -171,7 +179,18 @@ public interface MyFirstSlice {
 ./run-forge.sh</code></pre>
       </div>
 
-      <p>Forge starts a full cluster on your laptop — real consensus, real routing, real failure scenarios. Open the dashboard at <code>http://localhost:8080</code> for live metrics and cluster visualization.</p>
+      <p>Forge starts a 5-node cluster on your laptop — real consensus, real leader election, real routing. Key ports:</p>
+
+      <table class="docs-table">
+        <thead><tr><th>Service</th><th>Port</th><th>URL</th></tr></thead>
+        <tbody>
+          <tr><td>Dashboard</td><td>8888</td><td><code>http://localhost:8888</code></td></tr>
+          <tr><td>App HTTP (via LB)</td><td>8080</td><td><code>http://localhost:8080</code></td></tr>
+          <tr><td>Management API</td><td>5150</td><td><code>http://localhost:5150</code></td></tr>
+        </tbody>
+      </table>
+
+      <p>Open the dashboard to see live metrics, cluster topology, and node status. Stop Forge with <code>Ctrl+C</code>.</p>
 
       <h2 id="deploy">Step 5: Deploy</h2>
 
@@ -180,14 +199,14 @@ public interface MyFirstSlice {
 ./deploy-forge.sh</code></pre>
       </div>
 
-      <p>This uploads the slice artifact to the Forge cluster and deploys it. You should see the slice activate across nodes in the dashboard.</p>
+      <p>This builds a blueprint artifact, uploads it to the running Forge cluster, and deploys it. You should see the slice activate across nodes in the dashboard.</p>
 
-      <p>Test it:</p>
+      <p>Test it (the URL path depends on your <code>routes.toml</code> configuration):</p>
 
       <div class="code-block">
-        <pre><code>curl -X POST http://localhost:8080/my-first-slice/process \
+        <pre><code>curl -s -X POST http://localhost:8080/api/v1/my-first-slice/ \
   -H "Content-Type: application/json" \
-  -d '{"value": "hello"}'</code></pre>
+  -d '{"value": "hello"}' | jq</code></pre>
       </div>
 
       <h2 id="next-steps">Next Steps</h2>
@@ -203,7 +222,7 @@ public interface MyFirstSlice {
         </a>
         <a href="feature-catalog.html" class="docs-card">
           <h3>Feature Catalog</h3>
-          <p>172 capabilities with implementation status.</p>
+          <p>173 capabilities with implementation status.</p>
         </a>
       </div>
     </div>
