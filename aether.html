@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pragmatica Aether | Unified Application Runtime for Java | Pragmatica Labs</title>
-  <meta name="description" content="Pragmatica Aether — the unified application runtime for Java. Write business logic as slices, deploy distributed. Predictive autoscaling, fault tolerance, zero-downtime deployments.">
+  <meta name="description" content="Pragmatica Aether — the unified application runtime for Java. Write business logic as slices, deploy distributed. Fault tolerance, deployment strategies, and predictive autoscaling (in development).">
   <meta property="og:title" content="Pragmatica Aether — The Unified Application Runtime for Java">
-  <meta property="og:description" content="Write business logic as slices, deploy distributed. One runtime replaces your entire infrastructure stack.">
+  <meta property="og:description" content="Write business logic as slices, deploy distributed. One runtime that replaces much of your infrastructure stack.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://pragmaticalabs.io/aether.html">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,6 +41,7 @@
         <a href="docs/getting-started.html" class="btn btn-primary">Get Started</a>
         <a href="docs/developer-guide.html" class="btn btn-secondary">Developer Guide</a>
       </div>
+      <p style="display:inline-block; margin-top:1.25rem; padding:0.5rem 0.9rem; border-radius:8px; background:#fef3c7; color:#92400e; font-size:0.875rem; font-weight:600;">Status: in active development — release-candidate series toward GA. Not yet production-ready.</p>
     </div>
   </section>
 
@@ -100,7 +101,7 @@ public interface OrderService {
             </ul>
           </div>
         </div>
-        <p>Typed Java interfaces with request/response semantics. Not message passing, not actors. Your existing service-based designs and team knowledge transfer directly. The only design requirement: slice methods should be idempotent.</p>
+        <p>Typed Java interfaces with request/response semantics. Not message passing, not actors. Your existing service-based designs and team knowledge transfer directly. A key design requirement: slice methods should be idempotent.</p>
       </div>
     </div>
   </section>
@@ -115,7 +116,7 @@ public interface OrderService {
         <div>
           <ul class="features-list">
             <li><strong>Consensus KV Store.</strong> Leaderless Rabia consensus — single source of truth for config, deployment state, and discovery. No external coordination services.</li>
-            <li><strong>Two-Layer Topology.</strong> Core nodes (3-9) run consensus. Worker groups scale to thousands via SWIM gossip — O(1) failure detection, zero consensus overhead.</li>
+            <li><strong>Two-Layer Topology.</strong> Core nodes (3-9) run consensus. Worker groups scale horizontally via SWIM gossip — O(1) failure detection, no consensus overhead.</li>
             <li><strong>Declarative Deployment.</strong> Blueprints carry code + config + database migrations. One artifact, one command, atomic deployment.</li>
             <li><strong>ClassLoader Isolation.</strong> Per-slice classloader — two slices can use different versions of the same library without conflict.</li>
             <li><strong>Native Async PostgreSQL.</strong> Built-in driver with binary protocol and pipelining. No external connection pooler needed.</li>
@@ -132,7 +133,7 @@ public interface OrderService {
         </div>
       </div>
       <div class="text-center mt-2">
-        <a href="docs/feature-catalog.html" class="btn btn-outline">See all 173 features</a>
+        <a href="docs/feature-catalog.html" class="btn btn-outline">See the full feature catalog</a>
       </div>
       <div class="two-col mt-2">
         <div>
@@ -163,18 +164,18 @@ instances = 5</code></pre>
         <div>
           <h2>Fault Tolerance</h2>
           <p>The system survives failure of less than half the core nodes. A 5-node cluster tolerates 2 simultaneous failures. A 7-node cluster tolerates 3.</p>
-          <p>When a node fails, recovery is automatic. Requests retry on healthy nodes. A replacement provisions, connects, restores state, and begins serving traffic. No human intervention.</p>
+          <p>When a node fails, recovery is designed to be automatic: requests retry on healthy nodes, and a replacement provisions, connects, restores state, and begins serving traffic — without operator action.</p>
         </div>
         <div>
-          <h2>Zero-Downtime Deployments</h2>
+          <h2>Designed for Zero-Downtime Deployments</h2>
           <p>Four strategies, built in:</p>
           <ul class="features-list">
             <li><strong>Rolling</strong> — weighted traffic routing with gradual shift</li>
             <li><strong>Canary</strong> — progressive traffic shift through configurable stages with auto-evaluation and auto-rollback</li>
-            <li><strong>Blue-green</strong> — atomic switchover via consensus (~5ms routing change)</li>
+            <li><strong>Blue-green</strong> — atomic switchover via consensus</li>
             <li><strong>A/B testing</strong> — deterministic traffic split by request context</li>
           </ul>
-          <p>Deploy during business hours. Health degrades? Instant rollback.</p>
+          <p>Deploy during business hours. Health degrades? Automatic rollback.</p>
         </div>
       </div>
     </div>
@@ -188,15 +189,15 @@ instances = 5</code></pre>
       <div class="two-col">
         <div>
           <h3>Three Dimensions</h3>
-          <p><strong>Slice scaling</strong> — more instances on existing nodes. Classes already loaded; scaling takes milliseconds.</p>
+          <p><strong>Slice scaling</strong> — more instances on existing nodes. Classes are already loaded, so new instances start quickly.</p>
           <p><strong>Node scaling</strong> — add machines. Node connects, restores state, begins serving.</p>
-          <p><strong>Worker group scaling</strong> — thousands of nodes via SWIM gossip. Zero consensus overhead.</p>
+          <p><strong>Worker group scaling</strong> — add nodes via SWIM gossip. No consensus overhead.</p>
         </div>
         <div>
           <h3>Predictive Intelligence</h3>
           <ul class="features-list">
             <li><strong>Tier 1 — Decision Tree</strong> (1-second). Reactive: CPU, latency, queue depth, error rate.</li>
-            <li><strong>Tier 2 — TTM Predictor</strong> (60-second). ONNX ML model, 2-hour sliding window, 11-metric feature vector. Scale <em>before</em> the spike.</li>
+            <li><strong>Tier 2 — TTM Predictor</strong> (60-second, in development). ONNX ML model, 2-hour sliding window, 11-metric feature vector. Aims to scale <em>before</em> the spike.</li>
             <li><strong>Tier 3 — LLM-based</strong> (planned). Long-term capacity planning.</li>
           </ul>
           <p>If TTM fails, Decision Tree continues. No scaling disruption.</p>
@@ -265,27 +266,9 @@ instances = 5</code></pre>
   <section class="alt">
     <div class="container">
       <div class="section-header">
-        <h2>Proven in Practice</h2>
+        <h2>Design &amp; Verification</h2>
       </div>
-      <div class="stats">
-        <div>
-          <div class="stat-value">8K req/s</div>
-          <div class="stat-label">Sustained throughput</div>
-        </div>
-        <div>
-          <div class="stat-value">&lt;5ms</div>
-          <div class="stat-label">p95 latency</div>
-        </div>
-        <div>
-          <div class="stat-value">0.00%</div>
-          <div class="stat-label">Error rate (5.9M req)</div>
-        </div>
-        <div>
-          <div class="stat-value">3,000+</div>
-          <div class="stat-label">Tests</div>
-        </div>
-      </div>
-      <p class="text-center" style="font-size: 0.875rem;">Docker cluster on laptop (i7-11800H, 32GB), real PostgreSQL, mixed read/write. Scales to 15K req/s with sub-50ms p95.</p>
+      <p>Aether is developed test-first and exercised by a multi-node integration suite that injects node failures, network partitions, and rolling restarts. Verification is ongoing as the runtime moves through its release-candidate series toward GA.</p>
     </div>
   </section>
 
@@ -303,7 +286,7 @@ instances = 5</code></pre>
         </div>
         <div>
           <h2>Pilot Program</h2>
-          <p>Direct team access, priority support, roadmap influence, favorable terms.</p>
+          <p>Direct access to the founder, priority support, roadmap influence, favorable terms.</p>
           <p>Ideal: Java backend with scaling challenges, microservices pain, production target.</p>
           <div class="mt-2">
             <a href="https://cal.eu/sergiy.yevtushenko/30min" target="_blank" class="btn btn-primary">Book a Call</a>

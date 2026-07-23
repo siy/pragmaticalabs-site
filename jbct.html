@@ -6,7 +6,7 @@
   <title>JBCT | Java Backend Coding Technology | Pragmatica Labs</title>
   <meta name="description" content="JBCT - methodology and tooling for writing high-quality, deterministic Java code. Automated validation, AI guardrails, and training services.">
   <meta property="og:title" content="JBCT — Java Backend Coding Technology">
-  <meta property="og:description" content="Methodology and tooling for writing high-quality, deterministic Java code. Automated validation with zero false negatives.">
+  <meta property="og:description" content="Methodology and tooling for writing high-quality, deterministic Java code. Automated validation with a low false-positive rate.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://pragmaticalabs.io/jbct.html">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,28 +38,19 @@
     </div>
   </section>
 
-  <section class="alt">
-    <div class="container">
-      <blockquote style="max-width: 800px; margin: 0 auto; padding: 2rem; border-left: 4px solid var(--amber); background: var(--white); border-radius: 0 8px 8px 0; box-shadow: var(--shadow-sm);">
-        <p style="font-size: 1.25rem; line-height: 1.6; color: var(--gray-800); margin-bottom: 1rem; font-style: italic;">"Stop letting technical scaffolding drown out business logic. Use Result types, sealed interfaces, composition. The language subset you actually need is smaller than you think. What you get is structure and predictability. Code that reads like a spec, not like a framework tutorial. For me that's the difference between craftsmanship and engineering."</p>
-        <footer style="color: var(--gray-600); font-size: 0.9375rem;">— <strong>Siarhei Dudzin</strong>, Technical Lead / Software Engineer</footer>
-      </blockquote>
-    </div>
-  </section>
-
   <section>
     <div class="container">
       <div class="two-col">
         <div>
           <h2>The Problem</h2>
-          <p>84% of developers now use AI coding tools, but 46% don't trust the output. Code churn from AI-generated code is 41% higher than human-written code.</p>
+          <p>AI coding tools are everywhere now, but trust in their output lags behind adoption — they accelerate output without guaranteeing consistency or correctness.</p>
           <p>Meanwhile, growing teams struggle with consistency. New developers take months to become productive. Code reviews catch style issues but miss architectural problems.</p>
           <p>Frameworks promise productivity but often obscure business logic under layers of annotations and "magic."</p>
         </div>
         <div>
           <h2>The Solution</h2>
           <p>JBCT provides a methodology for writing high-quality Java code, backed by automated validation tooling.</p>
-          <p>It enforces patterns that make code predictable, maintainable, and self-documenting. The CLI catches issues with zero false negatives — if it says there's a problem, there's a problem.</p>
+          <p>It enforces patterns that make code predictable, maintainable, and self-documenting. The CLI catches issues with a low false-positive rate, so flagged issues are almost always real.</p>
           <p>For AI-generated code, JBCT acts as guardrails — catching mistakes before they reach production.</p>
         </div>
       </div>
@@ -89,7 +80,7 @@
           <p>CLI and Maven plugin for automated validation. Integrates into your existing CI/CD pipeline.</p>
           <ul class="features-list">
             <li>Deterministic validation</li>
-            <li>Zero false negatives</li>
+            <li>Low false-positive rate</li>
             <li>Pattern-based code review</li>
             <li>AI code quality checks</li>
           </ul>

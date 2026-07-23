@@ -44,6 +44,7 @@
 
       <h1>Aether Operator Guide</h1>
       <p>Deploy, scale, and monitor Aether clusters.</p>
+      <p style="display:inline-block; margin-top:0.5rem; padding:0.5rem 0.9rem; border-radius:8px; background:#fef3c7; color:#92400e; font-size:0.875rem; font-weight:600;">Status: in active development — release-candidate series toward GA. Not yet production-ready.</p>
 
       <h2 id="cluster-bootstrap">Cluster Bootstrap</h2>
 
@@ -97,7 +98,7 @@ aether deploy complete        # Finalize deployment</code></pre>
           <tr><td>Immediate</td><td>All instances at once</td><td>Manual redeploy previous version</td></tr>
           <tr><td>Rolling</td><td>Weighted traffic shift with health thresholds</td><td><code>aether rollback</code></td></tr>
           <tr><td>Canary</td><td>Progressive traffic shift through configurable stages (e.g., 5% → 25% → 50% → 100%) with auto-evaluation</td><td>Automatic on health degradation</td></tr>
-          <tr><td>Blue-green</td><td>Atomic switchover via consensus (~5ms routing change, plus drain for in-flight requests)</td><td>Instant switch back</td></tr>
+          <tr><td>Blue-green</td><td>Atomic switchover via consensus (drain for in-flight requests)</td><td>Instant switch back</td></tr>
           <tr><td>A/B testing</td><td>Deterministic split by request context</td><td>Remove variant</td></tr>
         </tbody>
       </table>
@@ -115,7 +116,7 @@ aether deploy complete        # Finalize deployment</code></pre>
       <h3>Auto-Scaling</h3>
 
       <p><strong>Tier 1 — Decision Tree</strong> (1-second intervals): reactive scaling on CPU, latency, queue depth, error rate. Always active.</p>
-      <p><strong>Tier 2 — TTM Predictor</strong> (60-second intervals): ONNX ML model with 2-hour sliding window. Predicts load spikes before they happen.</p>
+      <p><strong>Tier 2 — TTM Predictor</strong> (60-second intervals, in development): ONNX ML model with 2-hour sliding window. Aims to predict load spikes before they happen; not yet connected to live training.</p>
       <p>If TTM fails, Decision Tree continues with default thresholds. No scaling disruption.</p>
 
       <h3>Manual Scaling</h3>
@@ -227,11 +228,11 @@ aether backup restore abc1234</code></pre>
         </a>
         <a href="feature-catalog.html" class="docs-card">
           <h3>Feature Catalog</h3>
-          <p>173 capabilities with implementation status.</p>
+          <p>172 capabilities with implementation status.</p>
         </a>
         <a href="../contact.html" class="docs-card">
           <h3>Pilot Program</h3>
-          <p>Direct access to the team, priority support, roadmap influence.</p>
+          <p>Direct access to the founder, priority support, roadmap influence.</p>
         </a>
       </div>
     </div>
