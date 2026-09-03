@@ -49,7 +49,7 @@
 
       <h1>My First Aether Slice</h1>
       <p>Build, test, and deploy your first slice from scratch.</p>
-      <p style="display:inline-block; margin-top:0.5rem; padding:0.5rem 0.9rem; border-radius:8px; background:#fef3c7; color:#92400e; font-size:0.875rem; font-weight:600;">Status: in active development — release-candidate series toward GA. Not yet production-ready.</p>
+      <p style="display:inline-block; margin-top:0.5rem; padding:0.5rem 0.9rem; border-radius:8px; background:#fef3c7; color:#92400e; font-size:0.875rem; font-weight:600;">Status: in active development — release-candidate series toward GA; current candidate <a href="https://github.com/pragmaticalabs/pragmatica/releases/tag/v1.0.0-rc3" style="color:inherit; text-decoration:underline;">1.0.0-rc3</a> (2026-09-02). Not yet production-ready.</p>
 
       <h2 id="prerequisites">Prerequisites</h2>
 
@@ -60,7 +60,7 @@
         <tbody>
           <tr><td>Java</td><td>25+</td><td><code>java --version</code></td></tr>
           <tr><td>Maven</td><td>3.8+</td><td><code>mvn --version</code></td></tr>
-          <tr><td>JBCT CLI</td><td>1.0.0-rc1+</td><td><code>jbct --version</code></td></tr>
+          <tr><td>JBCT CLI</td><td>1.0.0-rc3</td><td><code>jbct --version</code></td></tr>
         </tbody>
       </table>
 
@@ -187,8 +187,6 @@ public interface MyFirstSlice {
         <thead><tr><th>Service</th><th>Port</th><th>URL</th></tr></thead>
         <tbody>
           <tr><td>Dashboard</td><td>8888</td><td><code>http://localhost:8888</code></td></tr>
-          <tr><td>App HTTP (via LB)</td><td>8080</td><td><code>http://localhost:8080</code></td></tr>
-          <tr><td>Management API</td><td>5150</td><td><code>http://localhost:5150</code></td></tr>
         </tbody>
       </table>
 

@@ -45,7 +45,7 @@
 
       <h1>Reference</h1>
       <p>CLI commands, management API, configuration, and slice API.</p>
-      <p style="display:inline-block; margin-top:0.5rem; padding:0.5rem 0.9rem; border-radius:8px; background:#fef3c7; color:#92400e; font-size:0.875rem; font-weight:600;">Status: in active development — release-candidate series toward GA. Not yet production-ready.</p>
+      <p style="display:inline-block; margin-top:0.5rem; padding:0.5rem 0.9rem; border-radius:8px; background:#fef3c7; color:#92400e; font-size:0.875rem; font-weight:600;">Status: in active development — release-candidate series toward GA; current candidate <a href="https://github.com/pragmaticalabs/pragmatica/releases/tag/v1.0.0-rc3" style="color:inherit; text-decoration:underline;">1.0.0-rc3</a> (2026-09-02). Not yet production-ready.</p>
 
       <h2 id="cli">CLI Tools</h2>
 
@@ -111,24 +111,26 @@ aether status</code></pre>
 
       <h2 id="management-api">Management API</h2>
 
-      <p>60+ REST endpoints across 13 route classes. All endpoints accept JSON and return JSON. The table below shows key endpoints — see the full API in the <a href="https://github.com/pragmaticalabs/pragmatica/blob/main/aether/docs/reference/management-api.md" target="_blank">management API reference</a>.</p>
+      <p>190+ REST endpoints, every one under <code>/api/v1</code> except the two health probes. All endpoints accept JSON and return JSON. The table below shows key endpoints — see the full API in the <a href="https://github.com/pragmaticalabs/pragmatica/blob/main/aether/docs/reference/management-api.md" target="_blank">management API reference</a>.</p>
 
       <table class="docs-table">
         <thead><tr><th>Endpoint</th><th>Method</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td><code>/api/status</code></td><td>GET</td><td>Cluster status</td></tr>
-          <tr><td><code>/api/health</code></td><td>GET</td><td>Health check (liveness/readiness)</td></tr>
-          <tr><td><code>/api/nodes</code></td><td>GET</td><td>List cluster nodes</td></tr>
-          <tr><td><code>/api/slices</code></td><td>GET</td><td>List deployed slices</td></tr>
-          <tr><td><code>/api/routes</code></td><td>GET</td><td>List HTTP routes</td></tr>
-          <tr><td><code>/api/scale</code></td><td>POST</td><td>Manual scaling</td></tr>
-          <tr><td><code>/api/deploy</code></td><td>POST</td><td>Deploy blueprint</td></tr>
-          <tr><td><code>/api/blueprint/publish</code></td><td>POST</td><td>Publish blueprint artifact</td></tr>
-          <tr><td><code>/api/metrics</code></td><td>GET</td><td>System and invocation metrics</td></tr>
-          <tr><td><code>/api/events</code></td><td>GET</td><td>Cluster events</td></tr>
-          <tr><td><code>/api/config</code></td><td>GET/PUT</td><td>Runtime configuration</td></tr>
-          <tr><td><code>/api/topology</code></td><td>GET</td><td>Compile-time data-flow graph</td></tr>
-          <tr><td><code>/metrics</code></td><td>GET</td><td>Prometheus scrape endpoint</td></tr>
+          <tr><td><code>/health/live</code></td><td>GET</td><td>Liveness probe (not under /api/v1)</td></tr>
+          <tr><td><code>/health/ready</code></td><td>GET</td><td>Readiness probe (not under /api/v1)</td></tr>
+          <tr><td><code>/api/v1/cluster/status</code></td><td>GET</td><td>Cluster status: leader, core count, phase</td></tr>
+          <tr><td><code>/api/v1/cluster/&hellip;</code></td><td>GET</td><td>Topology, generation, membership, provisioning</td></tr>
+          <tr><td><code>/api/v1/nodes</code></td><td>GET</td><td>List cluster nodes</td></tr>
+          <tr><td><code>/api/v1/nodes/routes</code></td><td>GET</td><td>List HTTP routes</td></tr>
+          <tr><td><code>/api/v1/nodes/drain/{id}</code></td><td>POST</td><td>Drain a node</td></tr>
+          <tr><td><code>/api/v1/nodes/shutdown/{id}</code></td><td>POST</td><td>Shut down a node</td></tr>
+          <tr><td><code>/api/v1/slices</code></td><td>GET</td><td>List deployed slices</td></tr>
+          <tr><td><code>/api/v1/scale</code></td><td>POST</td><td>Set scaling config</td></tr>
+          <tr><td><code>/api/v1/deploy</code></td><td>POST</td><td>Deploy a blueprint (canary, blue-green, rolling)</td></tr>
+          <tr><td><code>/api/v1/blueprints</code></td><td>GET/POST</td><td>Blueprint CRUD</td></tr>
+          <tr><td><code>/api/v1/config/&hellip;</code></td><td>PUT</td><td>Runtime configuration overrides</td></tr>
+          <tr><td><code>/api/v1/metrics/&hellip;</code></td><td>GET</td><td>System, per-node, per-slice metrics</td></tr>
+          <tr><td><code>/api/v1/metrics/prometheus</code></td><td>GET</td><td>Prometheus scrape endpoint</td></tr>
         </tbody>
       </table>
 
@@ -148,12 +150,11 @@ aether status</code></pre>
       <table class="docs-table">
         <thead><tr><th>Port</th><th>Purpose</th><th>Notes</th></tr></thead>
         <tbody>
-          <tr><td>8070+</td><td>App HTTP (per node)</td><td>8070, 8071, 8072... Configurable</td></tr>
-          <tr><td>5150</td><td>Management API</td><td>Configurable</td></tr>
-          <tr><td>8888</td><td>Dashboard (Forge)</td><td>Configurable</td></tr>
-          <tr><td>8080</td><td>Passive Load Balancer</td><td>Configurable</td></tr>
-          <tr><td>4000+</td><td>Cluster transport (consensus, QUIC)</td><td>Configurable</td></tr>
-          <tr><td>4001+</td><td>SWIM failure detection</td><td>Auto-derived (cluster port + 1)</td></tr>
+          <tr><td>8070</td><td>App HTTP (slice endpoints)</td><td>TCP, per node. Configurable</td></tr>
+          <tr><td>8080</td><td>Management API</td><td>TCP, per node. Configurable</td></tr>
+          <tr><td>8090</td><td>Cluster transport (QUIC: consensus, KV-Store, HTTP forwarding, DHT)</td><td>UDP, per node</td></tr>
+          <tr><td>8190</td><td>SWIM failure detection</td><td>UDP, per node</td></tr>
+          <tr><td>8888</td><td>Dashboard (Forge)</td><td>Configurable via <code>FORGE_PORT</code></td></tr>
         </tbody>
       </table>
 
